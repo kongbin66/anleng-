@@ -19,6 +19,8 @@ void hardware_init()
   display.init();
   display.flipScreenVertically();
   key_init();
+  adcAttachPin(BATTERY_ADC_PIN); //将引脚连接到ADC
+  adcStart(BATTERY_ADC_PIN);     //在连接的引脚总线上开始ADC转换
 }
 /*----------------------------------------------------------
                  软件初始化操作相关

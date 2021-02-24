@@ -66,7 +66,7 @@ void getBatteryFromADC()
   Serial.print(bat_mv);
   Serial.println("mV");
 }
-void PowerManagment(uint32_t time_delay)
+void PowerManagment(uint32_t time_delay)//保持升压芯片持续工作
 {
  // Wire.begin(SDA, SCL);
   delay(100);
@@ -79,7 +79,7 @@ void PowerManagment(uint32_t time_delay)
   getBatteryFromADC();
 }
 
-void fun_getBatteryLevel()//获取电量等级更改图标
+uint8_t fun_getBatteryLevel()//获取电量等级更改图标
 {
     uint8_t oldBatteryLevel=0,i=0; 
     while(i<=3)  //滤波处理
@@ -89,18 +89,19 @@ void fun_getBatteryLevel()//获取电量等级更改图标
        else i=0;
        oldBatteryLevel=BatteryLevel;
     }
-        i=0;
-        switch (BatteryLevel)
-        {
-          case 0:   p1=F16x16_b0;
+    i=0;
+    switch (BatteryLevel)
+    {
+          case 0:   p1=F16x16_b0,i=0;
           break;
-          case 25:  p1=F16x16_b20;
+          case 25:  p1=F16x16_b20,i=25;
           break;
-          case 75:  p1=F16x16_b60;
+          case 75:  p1=F16x16_b60,i=75;
           break;
-          case 100: p1=F16x16_b100;
+          case 100: p1=F16x16_b100,i=100;
           break;
-        default:
+        default:   i=0xff;
           break;
-        }
+    }
+    return i;
 }

@@ -19,7 +19,7 @@ void wakeup_init_time()
     reduce_sleeptime += sleep_time_count;
   }
 }
-void waking_update_time()
+void waking_update_time() //唤醒更新时间
 {
-  rtc.adjust(DateTime(now_unixtime + (millis() - time_last_async_stamp) / 1000));
+  rtc.adjust(DateTime(now_unixtime + (millis() - time_last_async_stamp) / 1000));//             （现在系统时间+ （系统时间-上一次时间戳）/1000）
 }

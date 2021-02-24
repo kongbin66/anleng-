@@ -28,7 +28,7 @@ RTC_Millis rtc;
 #define SerialAT  Serial1      //AT串口为UART1
 #define KEY1      14            //按键1对应引脚
 #define WEAKUPKEY1 GPIO_NUM_14 //按键1对应引脚
-
+#define BATTERY_ADC_PIN  4             //电量ADC采集管脚后续改到ADC1上，避免影响WIFI
 /*-------------------------------显示/按键相关定义-------------------------------------*/
 OneButton button(KEY1, true);
 SH1106Wire display(0x3c, 21, 22);
@@ -160,9 +160,9 @@ RTC_DATA_ATTR int timeLastNTP_Y, timeLastNTP_M, timeLastNTP_D, timeLastNTP_h, ti
 RTC_DATA_ATTR bool alFFS_thisRec_firstData_flag; //本次记录第一次上传
 RTC_DATA_ATTR char nowREC_filepath[21];          //记录文件的路径
 /*-------------------------------系统时间定义-------------------------------------*/
-RTC_DATA_ATTR uint32_t now_unixtime;
+RTC_DATA_ATTR uint32_t now_unixtime;//现在系统时间
 // RTC_DATA_ATTR int64_t now_unixtime64;
-time_t time_last_async_stamp;
+time_t time_last_async_stamp;//上一次的时间戳
 
 /*-------------------------------初始化相关init.ino-------------------------------------*/
 void hardware_init();
@@ -254,5 +254,5 @@ void PowerManagment(uint32_t time_delay);
 
 extern const char *p1;//电量图标显示
 extern uint8_t BatteryLevel;//电量等级
-void fun_getBatteryLevel();//获取电量等级更改显示图标
+uint8_t fun_getBatteryLevel();//获取电量等级更改显示图标
 #endif // CONFIG_H
