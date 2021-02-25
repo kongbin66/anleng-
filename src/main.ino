@@ -1,5 +1,6 @@
 #include "config.h"
 int rollback = 0;
+
 //电池电量ADC采集
 void battery_ADC()
 {
@@ -30,8 +31,6 @@ void setup()
   SerialMon.printf("/**************************************************************/\n");
   PowerManagment(100);//保持升压芯片持续工作
   software_init(); //软件初始化
-  
-
   if (rollback)
   {
     /*************如果rollback置1, 会恢复出厂设置,数据全清***********/
@@ -67,7 +66,6 @@ void setup()
       }
     }
 }
-
 
 
 void loop()
