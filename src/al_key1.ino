@@ -133,7 +133,7 @@ void key_init()
   button.attachDuringLongPress(duringLongPress);
   button.attachLongPressStop(longPressStop);
 }
-void key_attach_null()
+void key_attach_null()//
 {
   button.attachClick(nullfunc);
   button.attachDoubleClick(nullfunc);

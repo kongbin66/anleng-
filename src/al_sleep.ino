@@ -1,5 +1,5 @@
 #include "config.h"
-void go_sleep_a_while_with_ext0()
+void go_sleep_a_while_with_ext0()//进入休眠
 {
   esp_sleep_enable_ext0_wakeup(WEAKUPKEY1, LOW);//使能按键唤醒
   sleep_update_time();

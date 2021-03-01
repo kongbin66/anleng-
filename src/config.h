@@ -215,7 +215,7 @@ void sendTempAndHumi();
 // void onenet_mqtts_connect();
 // void onenet_mqtts_sendTemp_Humi_LBS();
 /*-------------------------------休眠服务相关al_sleep.ino---------------------*/
-void go_sleep_a_while_with_ext0();
+void go_sleep_a_while_with_ext0();//进入休眠
 
 /*--------------------------------eeprom相关函数--------------------*/
 void get_eeprom_firstBootFlag();
@@ -231,7 +231,8 @@ void showWelcome();
 void screen_loop();
 void screen_show();
 void send_Msg_var_GSM_while_OLED_on();
-void oled_on_off_switch();
+//OLED状态标志切换
+void oled_on_off_switch(); 
 
 /*********************************按键相关函数 al_key1.ino***********/
 

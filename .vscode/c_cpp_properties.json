@@ -10,7 +10,6 @@
             "includePath": [
                 "c:/Users/Administrator/Desktop/anleng_work/anleng-/include",
                 "c:/Users/Administrator/Desktop/anleng_work/anleng-/src",
-                "c:/Users/Administrator/Desktop/anleng_work/anleng-/.pio/libdeps/esp32dev/RTC/src",
                 "C:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/libraries/SPIFFS/src",
                 "C:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/libraries/FS/src",
                 "C:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/libraries/EEPROM/src",
@@ -80,6 +79,7 @@
                 "C:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/cores/esp32",
                 "C:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/variants/esp32",
                 "C:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/libraries/SPI/src",
+                "c:/Users/Administrator/Desktop/anleng_work/anleng-/.pio/libdeps/esp32dev/RTC/src",
                 "c:/Users/Administrator/Desktop/anleng_work/anleng-/.pio/libdeps/esp32dev/TinyWireM",
                 "C:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/libraries/ArduinoOTA/src",
                 "C:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/libraries/AsyncUDP/src",
@@ -110,7 +110,6 @@
                 "path": [
                     "c:/Users/Administrator/Desktop/anleng_work/anleng-/include",
                     "c:/Users/Administrator/Desktop/anleng_work/anleng-/src",
-                    "c:/Users/Administrator/Desktop/anleng_work/anleng-/.pio/libdeps/esp32dev/RTC/src",
                     "C:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/libraries/SPIFFS/src",
                     "C:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/libraries/FS/src",
                     "C:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/libraries/EEPROM/src",
@@ -180,6 +179,7 @@
                     "C:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/cores/esp32",
                     "C:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/variants/esp32",
                     "C:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/libraries/SPI/src",
+                    "c:/Users/Administrator/Desktop/anleng_work/anleng-/.pio/libdeps/esp32dev/RTC/src",
                     "c:/Users/Administrator/Desktop/anleng_work/anleng-/.pio/libdeps/esp32dev/TinyWireM",
                     "C:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/libraries/ArduinoOTA/src",
                     "C:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/libraries/AsyncUDP/src",

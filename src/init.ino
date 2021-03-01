@@ -1,20 +1,20 @@
 /*----------------------------------------------------------
-                 硬件初始化操作相关
+                 軟、硬件初始化操作相关
 *---------------------------------------------------------*/
 #include "config.h"
 
-void hardware_init()
+void hardware_init()//硬件初始化
 {
   gpio_hold_dis(GPIO_NUM_32);//解锁电源引脚
   gpio_deep_sleep_hold_dis();
-  pinMode(MODEM_POWER_ON, OUTPUT); //电源引脚
+  pinMode     (MODEM_POWER_ON, OUTPUT); //电源引脚
   digitalWrite(MODEM_POWER_ON,LOW);
   Wire.begin();
   SerialMon.begin(115200); //初始化调试串口
   Serial.println("wakeup");
   SerialAT.begin(115200, SERIAL_8N1, MODEM_RX, MODEM_TX); //初始化AT串口
-  sht20.begin();
-  EEPROM.begin(4096);
+  sht20.begin();//溫濕度傳感器初始化
+  EEPROM.begin(4096);//E2PROM初始化
   SPIFFS.begin();
   display.init();
   display.flipScreenVertically();
@@ -25,7 +25,7 @@ void hardware_init()
 /*----------------------------------------------------------
                  软件初始化操作相关
 *---------------------------------------------------------*/
-void software_init()
+void software_init()//軟件初始化
 {
   tempAndHumi_Ready = false;
   Serial.printf("workingState:%d\r\n", workingState);
