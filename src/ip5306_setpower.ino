@@ -1,7 +1,7 @@
 #include "config.h"
 //设置ip5306持续升压
-uint8_t BatteryLevel;
-bool setPowerBoostKeepOn(bool en)
+int8_t BatteryLevel;
+static bool setPowerBoostKeepOn(bool en)
 {
   Wire.beginTransmission(IP5306_ADDR);
   Wire.write(IP5306_REG_SYS_CTL0);
@@ -27,8 +27,45 @@ bool setPowerBoostKeepOn(bool en)
   }
   return Wire.endTransmission() == 0;
 }
+
+/* //读取电池端实时电压
+滤波100次，输出测量电压值 */
+float getBatteryFromADC()
+{
+  bat_mv = 0;
+  uint32_t oversample = 0;
+  for (size_t i = 0; i < 100; i++)
+  {
+    oversample += (uint32_t)analogRead(ADC_BAT);
+  }
+  bat_mv = (int)oversample / 100;
+  bat_mv = ((float)bat_mv / 4096) * 3.35 * 2+0.4;
+ 
+
+  Serial.println(String("Battery from ADC: ")+bat_mv+String("V"));
+  Serial.println(F("------------POWER-------------"));
+  Serial.println();
+  return bat_mv;
+}
+
+/* 设定电源芯片保持升压的同时，读取电量的电量等级级电池电压 */
+void PowerManagment()//保持升压芯片持续工作
+{
+ // Wire.begin(SDA, SCL);
+  delay(100);
+  bool isOk = setPowerBoostKeepOn(true); // Disables auto-standby, to keep 5V high during ESP32 sleep after 32Sec
+
+  // Set console baud rate
+  Serial.println(F("------------POWER-------------"));
+  Serial.println(String("IP5306 setPowerBoostKeepOn: ") + (isOk ? "OK" : "FAIL"));
+  Serial.println(String("IP5306 Battery level:") + getBatteryLevel()+String("%"));
+
+  getBatteryFromADC();
+}
+
+
 //检测电池电量等级
-int8_t getBatteryLevel()
+ int8_t getBatteryLevel()
 {
   Wire.beginTransmission(IP5306_ADDR);
   Wire.write(0x78);
@@ -50,50 +87,22 @@ int8_t getBatteryLevel()
   }
   return -1;
 }
-//读取电池端实时电压
-void getBatteryFromADC()
+//更新屏幕电量图片
+/**********************************************************
+      输出结果：
+      -1：未读取到电量(异常)
+      -2：其他不正确结果(异常)
+      0:   1/4
+      25： 2/4
+      75： 3/4
+      100：4/4
+***********************************************************/
+extern int8_t fun_getBatteryLevel(int8_t x)//刷新更改图标
 {
-  bat_mv = 0;
-  uint32_t oversample = 0;
-  for (size_t i = 0; i < 100; i++)
-  {
-    oversample += (uint32_t)analogRead(ADC_BAT);
-  }
-  bat_mv = (int)oversample / 100;
-  bat_mv = ((float)bat_mv / 4096) * 3600 * 2;
-
-  Serial.print("Battery from ADC: ");
-  Serial.print(bat_mv);
-  Serial.println("mV");
-}
-void PowerManagment(uint32_t time_delay)//保持升压芯片持续工作
-{
- // Wire.begin(SDA, SCL);
-  delay(100);
-  bool isOk = setPowerBoostKeepOn(true); // Disables auto-standby, to keep 5V high during ESP32 sleep after 32Sec
-
-  // Set console baud rate
-  Serial.println(F("Started"));
-  Serial.println(String("IP5306 setPowerBoostKeepOn: ") + (isOk ? "OK" : "FAIL"));
-  Serial.println(String("IP5306 Battery level:") + getBatteryLevel());
-  getBatteryFromADC();
-}
-
-int8_t fun_getBatteryLevel()//获取电量等级更改图标
-{
-    uint8_t oldBatteryLevel=0; 
-    int8_t i=0; 
-    while(i<=5)  //滤波处理
+    int8_t i=-2;
+    switch (x)
     {
-       BatteryLevel=getBatteryLevel(); //获取电压等级
-       if(BatteryLevel==oldBatteryLevel) i++;
-       else i=0;
-       oldBatteryLevel=BatteryLevel;
-    }
-    i=0;
-    switch (BatteryLevel)
-    {
-          case -1:  return -1;
+          case -1:  return -1;//未读取到电量(异常)
           case 0:   p1=F16x16_b0,i=0;
           break;
           case 25:  p1=F16x16_b20,i=25;
@@ -102,17 +111,61 @@ int8_t fun_getBatteryLevel()//获取电量等级更改图标
           break;
           case 100: p1=F16x16_b100,i=100;
           break;
-        default:   i=-1;
+        default:   i=-2;//其他不正确结果(异常)
           break;
     }
     return i;
 }
 
-//电池电量ADC采集
+
+
+
+
+
+//电量检测与电量低报警检测
+/* 1.采集芯片电量，刷新屏显示，电量低于系统设定温度时，更新报警标志POWER_warning_flag */
+void power_alarm_test()
+{
+   //
+   float temp=0;
+   uint8_t i=getBatteryLevel();
+  SerialMon.print("dianliangjiance...");
+  while (i==-1)
+  {
+    i=getBatteryLevel();
+    SerialMon.print(".");
+    delay(500);
+  }
+  SerialMon.println(); 
+  SerialMon.println("dianliang[ok!]");
+  //刷新屏幕显示电量
+  fun_getBatteryLevel(i);
+  if(i<=25)
+  {
+    SerialMon.println("diancidianyadi--xxx");  
+    temp= getBatteryFromADC();//读取电压
+    if(temp< Power_min_voltage) //电压低了
+       POWER_warning_flag = 1;//上传报警后进入关机状态。
+       //.........
+    else POWER_warning_flag = 0;
+  }
+
+}
+
+
+
+
+
+
+
+
+
+
+/* //电池电量ADC采集
 float battery_ADC()
 {
   uint32_t i = 0;
-  float j = 0.0;
+   float j = 0.0;
   uint8_t k = 10; //滤波次数
 
   for (; k > 0; k--)
@@ -122,12 +175,12 @@ float battery_ADC()
   SerialMon.print(j);
   SerialMon.printf("V\r\n");
   return j;
-}
+} */
 
-float power_getBatteryLevel()
+/*  float power_getBatteryLevel() 
 {
   uint8_t i = 0XFF, j = 0;
-  float k;
+  float k=0.0;
 
   do
   {
@@ -147,10 +200,12 @@ float power_getBatteryLevel()
     k = battery_ADC(); //AD检测和确定
   }
   return k;
-}
+} */
 
-void Power_test(float a) //确定电量最小值
+/* void Power_test(float a) //确定电量最小值
 {
+  SerialMon.println("++++++++++++++++++++++++++++++++++++++++++++++++++++");
+  SerialMon.println(a);
   if (a < Power_min_voltage) //电压低了
   {
     POWER_warning_flag = 1;
@@ -160,4 +215,5 @@ void Power_test(float a) //确定电量最小值
     power_getBatteryLevel(); //重新读取电量显示
     POWER_warning_flag = 0;
   }
-}
+  SerialMon.printf("POWER_warning_flag=%d",POWER_warning_flag);
+} */

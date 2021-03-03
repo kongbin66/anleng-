@@ -1,8 +1,6 @@
 #include "config.h"
 int rollback = 0;
 
-
-
 //第二核创建任务代码
 void codeForTask1(void *parameter)
 {
@@ -16,14 +14,31 @@ void codeForTask1(void *parameter)
 
 
 
+
+
+
+
+
 void setup()
 {
-
+  
   hardware_init(); //硬件初始化
   software_init(); //软件初始化
   SerialMon.printf("/**************************************************************/\n");
+  
+  //电量检测
+  power_alarm_test();
+ 
+  
 
-  Power_test(power_getBatteryLevel()); //电量采集和设置
+
+
+
+
+
+
+
+  //Power_test(power_getBatteryLevel()); //电量采集和设置
 
   if (rollback)
   {
@@ -63,7 +78,7 @@ void setup()
 
 void loop()
 {
-  uint8_t i;
+  Serial.printf("POWER_warning_flag=%d\r\n",POWER_warning_flag);
   waking_update_time();
   if (oledState == OLED_ON)
   {
@@ -75,6 +90,13 @@ void loop()
   }
   oled_on_off_switch();
 }
+
+
+
+
+
+
+
 
 void send_Msg_var_GSM_while_OLED_off()
 {
@@ -97,6 +119,14 @@ void send_Msg_var_GSM_while_OLED_off()
   delay(1000);
   digitalWrite(MODEM_POWER_ON, LOW); //关断800C电源
 }
+
+
+
+
+
+
+
+
 
 void send_Msg_var_GSM_while_OLED_on()
 {

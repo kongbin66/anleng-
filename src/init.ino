@@ -21,7 +21,7 @@ void hardware_init()//硬件初始化
   key_init();
   adcAttachPin(BATTERY_ADC_PIN); //将引脚连接到ADC
   //adcStart(BATTERY_ADC_PIN);     //在连接的引脚总线上开始ADC转换
-  PowerManagment(100);//保持升压芯片持续工作
+  PowerManagment();//保持升压芯片持续工作
 }
 /*----------------------------------------------------------
                  软件初始化操作相关

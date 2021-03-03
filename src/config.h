@@ -248,20 +248,22 @@ void sleep_update_time();
 void wakeup_init_time();
 void waking_update_time();
 
-int bat_mv;//电池电压
+float bat_mv;//电池电压
 #define ADC_BAT 4 // TCALL 35
 #define IP5306_ADDR 0x75
 #define IP5306_REG_SYS_CTL0 0x00
-int8_t getBatteryLevel();//获取电量等级
-bool setPowerBoostKeepOn(bool en);
-void PowerManagment(uint32_t time_delay);
+void PowerManagment();//保持升压芯片持续工作
 
 
 extern const char *p1;//电量图标显示
-extern uint8_t BatteryLevel;//电量等级
-float power_getBatteryLevel();
-void Power_test(float ); //确定电量最小值
-#define POWER_READ_NUM  50 //读取电量冗余次数
-#define Power_min_voltage 3.2//设定最小关机电压
+int8_t getBatteryLevel();//检测电池电量等级
+extern int8_t fun_getBatteryLevel(int8_t x);//刷新更改图标
+/* //读取电池端实时电压
+滤波100次，输出测量电压值 */
+float getBatteryFromADC();
+//电量检测与电量低报警检测
+void power_alarm_test();
+void Power_test(float );  //确定电量最小值
+#define Power_min_voltage 1.2//设定最小关机电压
 uint8_t POWER_warning_flag =0;//电压报警标志 0：正常 1：欠压
 #endif // CONFIG_H
