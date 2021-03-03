@@ -26,19 +26,8 @@ void setup()
   software_init(); //软件初始化
   SerialMon.printf("/**************************************************************/\n");
   
-  //电量检测
+  //电量检测及欠压报警检测
   power_alarm_test();
- 
-  
-
-
-
-
-
-
-
-
-  //Power_test(power_getBatteryLevel()); //电量采集和设置
 
   if (rollback)
   {
@@ -78,7 +67,7 @@ void setup()
 
 void loop()
 {
-  Serial.printf("POWER_warning_flag=%d\r\n",POWER_warning_flag);
+  //Serial.printf("POWER_warning_flag=%d\r\n",POWER_warning_flag);
   waking_update_time();
   if (oledState == OLED_ON)
   {
