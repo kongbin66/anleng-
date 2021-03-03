@@ -30,7 +30,7 @@ RTC_Millis rtc;
 #define SerialAT  Serial1      //AT串口为UART1
 #define KEY1      14            //按键1对应引脚
 #define WEAKUPKEY1 GPIO_NUM_14 //按键1对应引脚
-#define BATTERY_ADC_PIN  4             //电量ADC采集管脚后续改到ADC1上，避免影响WIFI
+#define BATTERY_ADC_PIN  4     //电量ADC采集管脚后续改到ADC1上，避免影响WIFI
 /*-------------------------------显示/按键相关定义-------------------------------------*/
 OneButton button(KEY1, true);
 SH1106Wire display(0x3c, 21, 22);
@@ -38,7 +38,9 @@ SH1106Wire display(0x3c, 21, 22);
 #define OLED_ON 1
 #define OLED_OFF 0
 //define state of workingState
+//停止工作
 #define NOT_WORKING 0
+//工作
 #define WORKING 1
 //state of Screens
 #define MAIN_TEMP_SCREEN 0
@@ -257,5 +259,9 @@ void PowerManagment(uint32_t time_delay);
 
 extern const char *p1;//电量图标显示
 extern uint8_t BatteryLevel;//电量等级
-uint8_t fun_getBatteryLevel();//获取电量等级更改显示图标
+float power_getBatteryLevel();
+void Power_test(float ); //确定电量最小值
+#define POWER_READ_NUM  50 //读取电量冗余次数
+#define Power_min_voltage 3.2//设定最小关机电压
+uint8_t POWER_warning_flag =0;//电压报警标志 0：正常 1：欠压
 #endif // CONFIG_H

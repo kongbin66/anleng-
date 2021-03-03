@@ -79,10 +79,11 @@ void PowerManagment(uint32_t time_delay)//保持升压芯片持续工作
   getBatteryFromADC();
 }
 
-uint8_t fun_getBatteryLevel()//获取电量等级更改图标
+int8_t fun_getBatteryLevel()//获取电量等级更改图标
 {
-    uint8_t oldBatteryLevel=0,i=0; 
-    while(i<=3)  //滤波处理
+    uint8_t oldBatteryLevel=0; 
+    int8_t i=0; 
+    while(i<=5)  //滤波处理
     {
        BatteryLevel=getBatteryLevel(); //获取电压等级
        if(BatteryLevel==oldBatteryLevel) i++;
@@ -92,6 +93,7 @@ uint8_t fun_getBatteryLevel()//获取电量等级更改图标
     i=0;
     switch (BatteryLevel)
     {
+          case -1:  return -1;
           case 0:   p1=F16x16_b0,i=0;
           break;
           case 25:  p1=F16x16_b20,i=25;
@@ -100,8 +102,62 @@ uint8_t fun_getBatteryLevel()//获取电量等级更改图标
           break;
           case 100: p1=F16x16_b100,i=100;
           break;
-        default:   i=0xff;
+        default:   i=-1;
           break;
     }
     return i;
+}
+
+//电池电量ADC采集
+float battery_ADC()
+{
+  uint32_t i = 0;
+  float j = 0.0;
+  uint8_t k = 10; //滤波次数
+
+  for (; k > 0; k--)
+    i += analogRead(BATTERY_ADC_PIN);
+  i = i / k;
+  j = (i * 3.3 / 4096 + 0.23) * 2;
+  SerialMon.print(j);
+  SerialMon.printf("V\r\n");
+  return j;
+}
+
+float power_getBatteryLevel()
+{
+  uint8_t i = 0XFF, j = 0;
+  float k;
+
+  do
+  {
+    i = fun_getBatteryLevel(); //获取电源管理芯片电池电量
+    j++;
+  } while (i == -1 || j > POWER_READ_NUM ); //读取失败连续读直到读取次数溢出。
+
+
+  // i=0;j=51;
+  if (j > POWER_READ_NUM ) //读取不到电量（异常）
+  {
+    j = 0;
+    SerialMon.println("ERR:Failed to read power!!");
+  }
+  else if (i == 0) //确定电源芯片反馈电压低
+  {
+    k = battery_ADC(); //AD检测和确定
+  }
+  return k;
+}
+
+void Power_test(float a) //确定电量最小值
+{
+  if (a < Power_min_voltage) //电压低了
+  {
+    POWER_warning_flag = 1;
+  }
+  else
+  {
+    power_getBatteryLevel(); //重新读取电量显示
+    POWER_warning_flag = 0;
+  }
 }

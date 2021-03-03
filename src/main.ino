@@ -1,22 +1,12 @@
 #include "config.h"
 int rollback = 0;
 
-//电池电量ADC采集
-void battery_ADC()
-{
-  uint32_t i=0;
-  uint8_t j;
-  for (j=0;j<10;j++)
-  {
-      i+=analogRead(BATTERY_ADC_PIN);
-  }
-  i=i/j;
-  Serial.print((((i*3.3)/4096)+0.23)*2);
-  SerialMon.printf("V\r\n");
-}
+
+
 //第二核创建任务代码
 void codeForTask1(void *parameter)
 {
+
   while (1) //这是核1 的loop
   {
     delay(10);
@@ -24,13 +14,17 @@ void codeForTask1(void *parameter)
   }
 }
 
+
+
 void setup()
 {
-  
+
   hardware_init(); //硬件初始化
-  SerialMon.printf("/**************************************************************/\n");
-  PowerManagment(100);//保持升压芯片持续工作
   software_init(); //软件初始化
+  SerialMon.printf("/**************************************************************/\n");
+
+  Power_test(power_getBatteryLevel()); //电量采集和设置
+
   if (rollback)
   {
     /*************如果rollback置1, 会恢复出厂设置,数据全清***********/
@@ -54,29 +48,23 @@ void setup()
     get_eeprom_firstBootFlag();           //获取EEPROM第1位,判断是否是初次开机
     alFFS_init();                         //初始化FFS
     eeprom_config_init();                 //初始化EEPROM
- 
   }
-  if (oledState == OLED_ON)  showWelcome();
-  else if (oledState == OLED_OFF)//不是开机，是定时唤醒。
+  if (oledState == OLED_ON)
+    showWelcome();
+  else if (oledState == OLED_OFF) //不是开机，是定时唤醒。
+  {
+    if (workingState == WORKING && (esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_TIMER))
     {
-      if (workingState == WORKING && (esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_TIMER))
-      {
-        send_Msg_var_GSM_while_OLED_off();//上传
-        go_sleep_a_while_with_ext0();//休眠
-      }
+      send_Msg_var_GSM_while_OLED_off(); //上传
+      go_sleep_a_while_with_ext0();      //休眠
     }
+  }
 }
-
 
 void loop()
 {
   uint8_t i;
   waking_update_time();
-  i=fun_getBatteryLevel();
-  if(i==0)
-  {
-    battery_ADC();
-  }
   if (oledState == OLED_ON)
   {
     sht20getTempAndHumi();
@@ -107,7 +95,7 @@ void send_Msg_var_GSM_while_OLED_off()
   alFFS_readRecing();
   reduce_sleeptime = 0;
   delay(1000);
-  digitalWrite(MODEM_POWER_ON,LOW);//关断800C电源
+  digitalWrite(MODEM_POWER_ON, LOW); //关断800C电源
 }
 
 void send_Msg_var_GSM_while_OLED_on()
@@ -171,5 +159,5 @@ void send_Msg_var_GSM_while_OLED_on()
       reduce_sleeptime = 0;
     }
   }
-  digitalWrite(MODEM_POWER_ON,LOW);
+  digitalWrite(MODEM_POWER_ON, LOW);
 }
