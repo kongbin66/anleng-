@@ -7,6 +7,8 @@ void hardware_init()//硬件初始化
 {
   gpio_hold_dis(GPIO_NUM_32);//解锁电源引脚
   gpio_deep_sleep_hold_dis();
+  pinMode     (13, OUTPUT); //KEY引脚
+  digitalWrite(13,LOW); 
   pinMode     (MODEM_POWER_ON, OUTPUT); //电源引脚
   digitalWrite(MODEM_POWER_ON,LOW);
   Wire.begin();
@@ -33,10 +35,10 @@ void software_init()//軟件初始化
   Serial.printf("oledState:%d\r\n", oledState);
   loopStartTime = millis();
   screen_loopEnabled = true;
-  show_tip_screen_last = 2500;
+  show_tip_screen_last = 2500;//2500
   show_BLE_screen_last = 8000;
   show_rec_stop_screen_last = 2000;
-  screen_On_last_span = 10000;
+  screen_On_last_span = 40000;//10000
   screen_Off_to_sleep_span = 3000;
   screen_On_Start = millis();
   screen_On_now = millis();

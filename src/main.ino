@@ -53,13 +53,17 @@ void setup()
     alFFS_init();                         //初始化FFS
     eeprom_config_init();                 //初始化EEPROM
   }
+
   if (oledState == OLED_ON)
-    showWelcome();
+   { showWelcome();
+    postMsgId=0;
+   }
   else if (oledState == OLED_OFF) //不是开机，是定时唤醒。
   {
     if (workingState == WORKING && (esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_TIMER))
     {
       send_Msg_var_GSM_while_OLED_off(); //上传
+      postMsgId++;
       go_sleep_a_while_with_ext0();      //休眠
     }
   }
@@ -76,6 +80,7 @@ void loop()
     key_loop();
     screen_show(); //OLED最终显示
     send_Msg_var_GSM_while_OLED_on();
+
   }
   oled_on_off_switch();
 }
@@ -176,7 +181,9 @@ void send_Msg_var_GSM_while_OLED_on()
       alFFS_addRec();
       alFFS_readRecing();
       reduce_sleeptime = 0;
+      postMsgId++;
     }
+    
   }
   digitalWrite(MODEM_POWER_ON, LOW);
 }

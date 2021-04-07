@@ -46,7 +46,7 @@ void showStatusBar()
   display.drawHorizontalLine(0, 53, 128);
   display.setFont(Dialog_plain_8);
   display.drawString(0, 56, "REC:");
-  display.drawString(20, 56, "121231");
+  display.drawString(20, 56, (String)postMsgId);
   char datestr[20];
   snprintf(datestr, 20, "%d-%d-%d", rtc.now().year(), rtc.now().month(), rtc.now().day());
   display.drawString(78, 56, datestr);
@@ -112,6 +112,7 @@ void temp_humi_Scroll()
       display.drawString(72 + 128 - i * 4, 12, tempParam);
       display.setTextAlignment(TEXT_ALIGN_LEFT);
     }
+    //delay(100);
     display.display();
   }
 }
@@ -194,6 +195,8 @@ void screen_loop()
   {
     loopnowTime = millis();
     looptimeSpan = loopnowTime - loopStartTime;
+
+
     switch (looptimeSpan)
     {
     case 0 ... 5000:
@@ -217,6 +220,9 @@ void screen_loop()
     }
   }
 }
+
+
+
 void screen_show()
 {
   switch (screenState)
@@ -264,6 +270,10 @@ void screen_show()
     break;
   }
 }
+
+
+
+
 void oled_on_off_switch()
 {
   screen_On_now = millis();

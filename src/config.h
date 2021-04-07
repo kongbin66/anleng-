@@ -90,7 +90,7 @@ time_t last_rec_stamp;                 //上次记录时间
 time_t now_rec_stamp;                  //计算现在记录时间
 
 /*-------------------------------出厂设置定义-------------------------------------*/
-#define FACTORY_SLEEPTIME 60000000//300000000    //休眠时间
+#define FACTORY_SLEEPTIME 300000000    //休眠时间
 #define FACTORY_TEMP_LIMIT_ENABLE 0    //出厂温度上下限失能
 #define FACTORY_TEMP_UPPER_LIMIT 50.0  //出厂温度上限
 #define FACTORY_TEMP_LOWER_LIMIT -40.0 //出厂温度下限
@@ -100,7 +100,8 @@ time_t now_rec_stamp;                  //计算现在记录时间
 #define FACTORY_TIME_HOUR 0            //出厂默认时间
 #define FACTORY_TIME_MIN 0             //出厂默认时间
 
-#if 0
+//设备码
+#if 1
 const char *mqtt_server = "218.201.45.7"; //onenet 的 IP地址
 const int port = 1883;                     //端口号
 #define mqtt_devid "al_kh00001_zx_0001"         //设备ID
@@ -109,7 +110,7 @@ const int port = 1883;                     //端口号
 #define mqtt_password "version=2018-10-31&res=products%2F4LwKzUwOpX%2Fdevices%2Fal_kh00001_zx_0001&et=4092599349&method=md5&sign=xpaXrOTMJ9WJjOVolwJhWw%3D%3D"
 #endif
 
-#if 1
+#if 0
 const char *mqtt_server = "218.201.45.7"; //onenet 的 IP地址
 const int port = 1883;                     //端口号
 #define mqtt_devid "al_kh00001_zx_0002"         //设备ID
@@ -248,7 +249,7 @@ void sleep_update_time();
 void wakeup_init_time();
 void waking_update_time();
 /********************电量采集相关*************************************/
-#define ADC_BAT 4 // TCALL 35
+#define ADC_BAT 36// TCALL 35
 #define IP5306_ADDR 0x75
 #define IP5306_REG_SYS_CTL0 0x00
 #define Power_min_voltage 1.2//设定最小关机电压
