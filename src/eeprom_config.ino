@@ -56,7 +56,7 @@ void eeprom_config_init()
   }
   else
   {
-    //EEPROM.writeInt(2, FACTORY_SLEEPTIME);//KB:强制设置睡眠时间间隔。
+    if(EEPROM_QZ) EEPROM.writeInt(2, FACTORY_SLEEPTIME);//KB:强制设置睡眠时间间隔。
     Serial.println("this is not the first load");
     sleeptime = (time_t)EEPROM.readInt(2);
     Serial.printf("sleeptime:%ld\r\n", sleeptime);

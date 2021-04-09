@@ -80,7 +80,7 @@ SH1106Wire display(0x3c, 21, 22);
 #define KEEP_RECING 2
 
 TaskHandle_t task1; //第二核创建一个任务句柄
-
+TaskHandle_t ds_task;
 RTC_DATA_ATTR int workingState;        //工作状态机
 RTC_DATA_ATTR int keyState;            //按键状态机
 RTC_DATA_ATTR int oledState;           //OLED工作状态机
@@ -234,6 +234,7 @@ void sendTempAndHumi();
 void go_sleep_a_while_with_ext0();//进入休眠
 
 /*--------------------------------eeprom相关函数--------------------*/
+#define EEPROM_QZ 0//强制设置睡眠时长
 void get_eeprom_firstBootFlag();
 void eeprom_config_init();
 void eeprom_config_set_sleeptime(time_t time1);

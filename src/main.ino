@@ -1,5 +1,4 @@
 #include "config.h"
-#include "string.h"
 int rollback = 0;
 
 //第二核创建任务代码
@@ -8,12 +7,22 @@ void codeForTask1(void *parameter)
 
   while (1) //这是核1 的loop
   {
-    delay(10);
+    vTaskDelay(10);
     button.tick(); //扫描按键
   }
+   vTaskDelete(NULL);
 }
 
-
+void ds1302_task(void *parameter)
+{
+   while(1)
+   {
+     rtc1.getDateTime(&now1);//读取时间参数到NOW
+     snprintf(timestr1, 10, "%02d:%02d:%02d", now1.hour, now1.minute,now1.second);
+     vTaskDelay(500);
+   }
+   vTaskDelete(NULL);
+}
 
 
 
@@ -31,6 +40,8 @@ void setup()
   
   //电量检测及欠压报警检测
   power_alarm_test();
+
+   xTaskCreate( ds1302_task,"ds1302_task",2000,NULL,1,&ds_task);//创建DS1302任务
 
   if (rollback)
   {

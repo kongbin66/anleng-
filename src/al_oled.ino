@@ -44,7 +44,7 @@ void showStatusBar()
 
 
   
-  rtc1.getDateTime(&now1);//读取时间参数到NOW
+  //rtc1.getDateTime(&now1);//读取时间参数到NOW
   snprintf(timestr1, 10, "%02d:%02d:%02d", now1.hour, now1.minute,now1.second);
   display.drawString(64, 0, timestr1);
  
