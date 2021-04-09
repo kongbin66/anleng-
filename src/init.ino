@@ -5,12 +5,17 @@
 
 void hardware_init()//硬件初始化
 {
-  gpio_hold_dis(GPIO_NUM_32);//解锁电源引脚
-  gpio_deep_sleep_hold_dis();
+  
   pinMode     (13, OUTPUT); //KEY引脚
   digitalWrite(13,LOW); 
   pinMode     (MODEM_POWER_ON, OUTPUT); //电源引脚
   digitalWrite(MODEM_POWER_ON,LOW);
+  bool i;
+    //初始化DS1302引脚
+  rtc1.init();
+  i=rtc1.isHalted();//检查运行DS1302
+  if(i) rtc1.halt(0);//启动1302
+
   Wire.begin();
   SerialMon.begin(115200); //初始化调试串口
   Serial.println("wakeup");

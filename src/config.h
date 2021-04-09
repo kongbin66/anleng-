@@ -14,23 +14,36 @@
 #include "images.h"
 #include "OneButton.h"
 #include "RTClib.h"
+#include <Ds1302.h>
 
 
 
-RTC_Millis rtc;
+
+
+
 /*-------------------------------SIM800L 硬件定义----------------------------------*/
 #define MODEM_RST 5      //SIM800L复位引脚接在GPIO5
 //#define MODEM_PWRKEY  //SIM800L开关机引脚接在GPIO32
 #define MODEM_POWER_ON 32 //SIM800L电源引脚接在GPIO4
 #define MODEM_TX 27       //SIM800L串口TX引脚接在GPIO27
 #define MODEM_RX 26       //SIM800L串口RX引脚接在GPIO26
-
+//ds1302驱动引脚
+#define PIN_ENA 5
+#define PIN_CLK 19
+#define PIN_DAT 18
 /*-------------------------------其他硬件定义-------------------------------------*/
 #define SerialMon Serial      //调试串口为UART0
 #define SerialAT  Serial1      //AT串口为UART1
 #define KEY1      14            //按键1对应引脚
 #define WEAKUPKEY1 GPIO_NUM_14 //按键1对应引脚
 #define BATTERY_ADC_PIN  4     //电量ADC采集管脚后续改到ADC1上，避免影响WIFI
+//创建DS1302对象
+Ds1302 rtc1(PIN_ENA, PIN_CLK, PIN_DAT);
+RTC_Millis rtc;
+char timestr1[20];
+char timestr2[20];
+Ds1302::DateTime now1;//ds1302读取的时间
+Ds1302::DateTime now2;//GSM接受的时间
 /*-------------------------------显示/按键相关定义-------------------------------------*/
 OneButton button(KEY1, true);
 SH1106Wire display(0x3c, 21, 22);
@@ -264,6 +277,10 @@ int8_t fun_Refresh_lcon(int8_t x); //刷新更改图标
 float getBatteryFromADC();/* //读取电池端实时电压*/
 void power_alarm_test();//电量检测与电量低报警检测
 void Power_test(float );  //确定电量最小值
+/*********************时间相关**************************************************/
+
+//Ds1302 rtc1=Ds1302(PIN_ENA, PIN_CLK, PIN_DAT);
+
 
 
 #endif // CONFIG_H

@@ -47,6 +47,7 @@ void modemToGPRS()
 /*-------------------------------获取位置信息-------------------------------------*/
 void getLBSLocation()
 {
+  int i;
   Serial.println("getting LBS...");
   float _locationE = 0, _locationN = 0, _locationA = 0; //地理位置,经度纬度
   int _timeLastNTP_Y = 0, _timeLastNTP_M = 0, _timeLastNTP_D = 0, _timeLastNTP_h = 0, _timeLastNTP_m = 0, _timeLastNTP_s = 0;
@@ -69,15 +70,21 @@ void getLBSLocation()
     timeNow_m = timeLastNTP_m;
     timeNow_s = timeLastNTP_s;
   }
-  Serial.printf("%d-%d-%d %d:%d:%d\r\n", timeLastNTP_Y, timeLastNTP_M, timeLastNTP_D, timeLastNTP_h, timeLastNTP_m, timeLastNTP_s);
-  Serial.printf("%d-%d-%d %d:%d:%d\r\n", timeNow_Y, timeNow_M, timeNow_D, timeNow_h, timeNow_m, timeNow_s);
-
   rtc.adjust(DateTime(timeNow_Y, timeNow_M, timeNow_D, timeNow_h, timeNow_m, timeNow_s));
   DateTime now = rtc.now();
   now_unixtime = now.unixtime();
-  // now_unixtime64 = now_unixtime;
   time_last_async_stamp = millis();
-  Serial.printf("rtc time now: %d-%d-%d %d:%d:%d\r\n", now.year(), now.month(), now.day(), now.hour(), now.minute(), now.second());
+ 
+  //对时
+   if(timeNow_Y!=0&&timeNow_M!=0&&timeNow_D!=0)//数据读出错误
+    now1.year= timeNow_Y;
+    now1.month=timeNow_M;
+    now1.day = timeNow_D;
+    now1.hour =timeNow_h;
+    now1.minute = timeNow_m;
+    now1.second = timeNow_s;
+    rtc1.setDateTime(&now1);
+
   EEPROM.writeULong(39, now_unixtime);
   EEPROM.commit();
 }

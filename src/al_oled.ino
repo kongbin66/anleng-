@@ -1,6 +1,6 @@
 #include "config.h"
 const char *p1=F16x16_b100;
-//启动界面
+//启动界面 安冷科技
 void showWelcome()
 {
   display.setFont(ArialMT_Plain_10);
@@ -17,9 +17,13 @@ void showWelcome()
   }
   delay(800);
 }
+
 //状态栏
 void showStatusBar()
 {
+
+  
+
   if (workingState == WORKING)
     display.drawIco16x16(0, 0, F16x16_rec);
   else
@@ -37,9 +41,15 @@ void showStatusBar()
   else
     display.drawIco16x16(48, 0, F16x16_space);
   display.setFont(Roboto_Condensed_12);
-  char timestr[20];
-  snprintf(timestr, 20, "%02d:%02d:%02d", rtc.now().hour(), rtc.now().minute(), rtc.now().second());
-  display.drawString(64, 0, timestr);
+
+
+  
+  rtc1.getDateTime(&now1);//读取时间参数到NOW
+  snprintf(timestr1, 10, "%02d:%02d:%02d", now1.hour, now1.minute,now1.second);
+  display.drawString(64, 0, timestr1);
+ 
+
+
 
   display.drawIco16x16(112, 0, p1);
   display.drawHorizontalLine(0, 16, 128);
@@ -47,10 +57,12 @@ void showStatusBar()
   display.setFont(Dialog_plain_8);
   display.drawString(0, 56, "REC:");
   display.drawString(20, 56, (String)postMsgId);
-  char datestr[20];
-  snprintf(datestr, 20, "%d-%d-%d", rtc.now().year(), rtc.now().month(), rtc.now().day());
-  display.drawString(78, 56, datestr);
+  snprintf(timestr1, 20, "%04d-%02d-%02d", now1.year, now1.month, now1.day);
+  Serial.printf("%d-%d-%d\n",now1.year,now1.month,now1.day);
+  display.drawString(78, 56, timestr1);
 }
+
+
 //温度显示界面
 void showTemp()
 {

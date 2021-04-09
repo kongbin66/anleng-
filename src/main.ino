@@ -1,4 +1,5 @@
 #include "config.h"
+#include "string.h"
 int rollback = 0;
 
 //第二核创建任务代码
@@ -20,7 +21,9 @@ void codeForTask1(void *parameter)
 
 
 void setup()
-{
+{ 
+  gpio_hold_dis(GPIO_NUM_32);//解锁电源引脚
+  gpio_deep_sleep_hold_dis();
   
   hardware_init(); //硬件初始化
   software_init(); //软件初始化
@@ -56,7 +59,7 @@ void setup()
 
   if (oledState == OLED_ON)
    { showWelcome();
-    postMsgId=0;
+    postMsgId=0;//清记录条数
    }
   else if (oledState == OLED_OFF) //不是开机，是定时唤醒。
   {
@@ -69,8 +72,12 @@ void setup()
   }
 }
 
+
+
+
 void loop()
 {
+
   //Serial.printf("POWER_warning_flag=%d\r\n",POWER_warning_flag);
   waking_update_time();
   if (oledState == OLED_ON)
@@ -187,3 +194,15 @@ void send_Msg_var_GSM_while_OLED_on()
   }
   digitalWrite(MODEM_POWER_ON, LOW);
 }
+
+
+
+
+
+
+
+
+
+
+
+
