@@ -1,5 +1,6 @@
 #include "config.h"
 const char *p1=F16x16_b100;
+
 //启动界面 安冷科技
 void showWelcome()
 {
@@ -21,7 +22,7 @@ void showWelcome()
 //状态栏
 void showStatusBar()
 {
-
+  char time[20];
   
 
   if (workingState == WORKING)
@@ -44,9 +45,9 @@ void showStatusBar()
 
 
   
-  //rtc1.getDateTime(&now1);//读取时间参数到NOW
-  snprintf(timestr1, 10, "%02d:%02d:%02d", now1.hour, now1.minute,now1.second);
-  display.drawString(64, 0, timestr1);
+
+  snprintf(time, sizeof(time), "%02d:%02d:%02d", now1.hour, now1.minute,now1.second);
+  display.drawString(64, 0, time);
  
 
 
@@ -57,9 +58,9 @@ void showStatusBar()
   display.setFont(Dialog_plain_8);
   display.drawString(0, 56, "REC:");
   display.drawString(20, 56, (String)postMsgId);
-  snprintf(timestr1, 20, "%04d-%02d-%02d", now1.year, now1.month, now1.day);
-  Serial.printf("%d-%d-%d\n",now1.year,now1.month,now1.day);
-  display.drawString(78, 56, timestr1);
+  snprintf(time, 20, "%04d-%02d-%02d", now1.year+2000, now1.month, now1.day);//年读出的数据没有2000
+  //Serial.printf("%d-%d-%d\n",now1.year,now1.month,now1.day);
+  display.drawString(78, 56, time);
 }
 
 

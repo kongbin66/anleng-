@@ -12,9 +12,9 @@ void hardware_init()//硬件初始化
   digitalWrite(MODEM_POWER_ON,LOW);
   bool i;
     //初始化DS1302引脚
-  rtc1.init();
-  i=rtc1.isHalted();//检查运行DS1302
-  if(i) rtc1.halt(0);//启动1302
+  ds_rtc.init();
+  i=ds_rtc.isHalted();//检查运行DS1302
+  if(i) ds_rtc.halt(0);//启动1302
 
   Wire.begin();
   SerialMon.begin(115200); //初始化调试串口

@@ -17,7 +17,7 @@
 #include <Ds1302.h>
 
 
-
+#define DEBUG 1
 
 
 
@@ -38,12 +38,10 @@
 #define WEAKUPKEY1 GPIO_NUM_14 //按键1对应引脚
 #define BATTERY_ADC_PIN  4     //电量ADC采集管脚后续改到ADC1上，避免影响WIFI
 //创建DS1302对象
-Ds1302 rtc1(PIN_ENA, PIN_CLK, PIN_DAT);
+Ds1302 ds_rtc(PIN_ENA, PIN_CLK, PIN_DAT);
 RTC_Millis rtc;
-char timestr1[20];
-char timestr2[20];
+
 Ds1302::DateTime now1;//ds1302读取的时间
-Ds1302::DateTime now2;//GSM接受的时间
 /*-------------------------------显示/按键相关定义-------------------------------------*/
 OneButton button(KEY1, true);
 SH1106Wire display(0x3c, 21, 22);
@@ -160,6 +158,7 @@ bool firstBootFlag; //第一次启动标志位
 RTC_DATA_ATTR int bleState;       //蓝牙状态机
 RTC_DATA_ATTR int lockState;      //开关箱状态机
 RTC_DATA_ATTR int qualifiedState; //合格状态机
+
 /*-------------------------------公共变量,参数定义-------------------------------------*/
 //以下参数需要休眠RTC记忆
 RTC_DATA_ATTR bool tempLimit_enable;                 //温度上下限报警开关

@@ -74,16 +74,16 @@ void getLBSLocation()
   DateTime now = rtc.now();
   now_unixtime = now.unixtime();
   time_last_async_stamp = millis();
- 
+ Serial.println(timeNow_Y);
   //对时
    if(timeNow_Y!=0&&timeNow_M!=0&&timeNow_D!=0)//数据读出错误
-    now1.year= timeNow_Y;
+    now1.year= timeNow_Y-2000;
     now1.month=timeNow_M;
     now1.day = timeNow_D;
     now1.hour =timeNow_h;
     now1.minute = timeNow_m;
     now1.second = timeNow_s;
-    rtc1.setDateTime(&now1);
+    ds_rtc.setDateTime(&now1);
 
   EEPROM.writeULong(39, now_unixtime);
   EEPROM.commit();

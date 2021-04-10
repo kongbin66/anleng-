@@ -17,8 +17,7 @@ void ds1302_task(void *parameter)
 {
    while(1)
    {
-     rtc1.getDateTime(&now1);//读取时间参数到NOW
-     snprintf(timestr1, 10, "%02d:%02d:%02d", now1.hour, now1.minute,now1.second);
+     ds_rtc.getDateTime(&now1);//读取时间参数到NOW
      vTaskDelay(500);
    }
    vTaskDelete(NULL);
@@ -42,7 +41,7 @@ void setup()
   power_alarm_test();
 
    xTaskCreate( ds1302_task,"ds1302_task",2000,NULL,1,&ds_task);//创建DS1302任务
-
+   xTaskCreatePinnedToCore(codeForTask1,"task1",1000,NULL,1, &task1,0);  
   if (rollback)
   {
     /*************如果rollback置1, 会恢复出厂设置,数据全清***********/
@@ -54,15 +53,7 @@ void setup()
     modem.sleepEnable();
   }
   else
-  {
-    //3. 将任务句柄和任务代码传与某个核连接起来, 开始执行
-    xTaskCreatePinnedToCore(codeForTask1, //任务函数名
-                            "task1",      //用户起的任务名
-                            1000,         //栈区分配大小
-                            NULL,         //创建任务时传入的参数
-                            1,            //优先级
-                            &task1,       //用于传回创建任务的句柄,
-                            0);           //用哪个核执行
+  {         
     get_eeprom_firstBootFlag();           //获取EEPROM第1位,判断是否是初次开机
     alFFS_init();                         //初始化FFS
     eeprom_config_init();                 //初始化EEPROM
@@ -72,9 +63,9 @@ void setup()
    { showWelcome();
     postMsgId=0;//清记录条数
    }
-  else if (oledState == OLED_OFF) //不是开机，是定时唤醒。
+  else 
   {
-    if (workingState == WORKING && (esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_TIMER))
+    if (workingState == WORKING && (esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_TIMER)) //不是开机，是定时唤醒。
     {
       send_Msg_var_GSM_while_OLED_off(); //上传
       postMsgId++;

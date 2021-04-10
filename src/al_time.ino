@@ -2,7 +2,12 @@
 
 void sleep_update_time()
 {
-  sleep_start_time = system_get_time();
+  sleep_start_time = system_get_time();//获取睡眠开始时间
+          #if DEBUG
+          Serial.printf("sleep_start_time:");
+          Serial.print(sleep_start_time);
+          Serial.println();
+          #endif
   waking_update_time();
   Serial.printf("sleep at : %d:%d:%d\r\n", rtc.now().hour(), rtc.now().minute(), rtc.now().second());
   EEPROM.writeULong(39, now_unixtime + (millis() - time_last_async_stamp) / 1000);
@@ -19,7 +24,8 @@ void wakeup_init_time()
     reduce_sleeptime += sleep_time_count;
   }
 }
-void waking_update_time() //唤醒更新时间
+//唤醒更新时间
+void waking_update_time() 
 {
   rtc.adjust(DateTime(now_unixtime + (millis() - time_last_async_stamp) / 1000));//             （现在系统时间+ （系统时间-上一次时间戳）/1000）
 }
