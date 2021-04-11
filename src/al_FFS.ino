@@ -12,7 +12,7 @@ void alFFS_addRec()
 {
   char tempStr[15];
   char tempStrtemplate[] = "%d%02d%02d %02d:%02d";
-  snprintf(tempStr, 15, tempStrtemplate, rtc.now().year(), rtc.now().month(), rtc.now().day(), rtc.now().hour(), rtc.now().minute());
+  snprintf(tempStr, sizeof(tempStr), tempStrtemplate, now1.year,now1.month,now1.day,now1.hour,now1.minute);
   Serial.print("DATE:");
   Serial.println(tempStr);
   Serial.print("now the alFFS_thisRec_firstData_flag value is :");
@@ -22,13 +22,13 @@ void alFFS_addRec()
     alFFS_thisRec_firstData_flag = false;
     Serial.println("first rec, so create a file named:");
     char tempPathtemplate[] = "/R%d%02d%02d_%02d%02d.json";
-    snprintf(nowREC_filepath, 21, tempPathtemplate, rtc.now().year(), rtc.now().month(), rtc.now().day(), rtc.now().hour(), rtc.now().minute());
+    snprintf(nowREC_filepath, 21, tempPathtemplate, now1.year,now1.month,now1.day,now1.hour,now1.minute);
     Serial.println(nowREC_filepath);
     Serial.println("now first write content to it");
     File f = SPIFFS.open(nowREC_filepath, FILE_WRITE);
     String strtemp = "{\"st\":\"" + (String)tempStr +
                      "\",\"data\": [{\"tm\":\"" + (String)tempStr +
-                     "\",\"tmsp\":" + (String)(rtc.now().unixtime() - 8 * 60 * 60) +
+                     "\",\"tmsp\":" + (String)(unixtime() ) +//- 8 * 60 * 60
                      ",\"tp\":" + (String)currentTemp +
                      ",\"h\":" + (String)currentHumi +
                      ",\"E\":" + (String)locationE +
@@ -45,7 +45,7 @@ void alFFS_addRec()
     Serial.println(nowREC_filepath);
     File f = SPIFFS.open(nowREC_filepath, FILE_APPEND);
     String strtemp = ",{\"tm\":\"" + (String)tempStr +
-                     "\",\"tmsp\":" + (String)(rtc.now().unixtime() - 8 * 60 * 60) +
+                     "\",\"tmsp\":" + (String)(unixtime() - 8 * 60 * 60) +
                      ",\"tp\":" + (String)currentTemp +
                      ",\"h\":" + (String)currentHumi +
                      ",\"E\":" + (String)locationE +
@@ -73,7 +73,7 @@ void alFFS_endRec()
 {
   char tempStr[15];
   char tempStrtemplate[] = "%d%02d%02d %02d:%02d";
-  snprintf(tempStr, 15, tempStrtemplate, rtc.now().year(), rtc.now().month(), rtc.now().day(), rtc.now().hour(), rtc.now().minute());
+  snprintf(tempStr, 15, tempStrtemplate, now1.year,now1.month,now1.day,now1.hour,now1.minute);
   Serial.print("DATE:");
   Serial.println(tempStr);
   File f = SPIFFS.open(nowREC_filepath, FILE_APPEND);

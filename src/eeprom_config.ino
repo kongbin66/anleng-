@@ -51,33 +51,50 @@ void eeprom_config_init()
     EEPROM.writeULong(39, 0);
     EEPROM.commit();
     firstBootFlag = false;
-    screen_On_Start = millis();
-    screen_On_now = millis();
+    //screen_On_Start = millis();
+    //screen_On_now = millis();
+    screen_On_Start = sys_sec;
+    screen_On_now = sys_sec;
   }
   else
   {
     if(EEPROM_QZ) EEPROM.writeInt(2, FACTORY_SLEEPTIME);//KB:强制设置睡眠时间间隔。
+
     Serial.println("this is not the first load");
-    sleeptime = (time_t)EEPROM.readInt(2);
-    Serial.printf("sleeptime:%ld\r\n", sleeptime);
+
+    sleeptime = (time_t)EEPROM.readLong(2);  Serial.printf("sleeptime:%ld\r\n", sleeptime);
     tempLimit_enable = EEPROM.read(10) == 0 ? false : true;
-    tempUpperLimit = EEPROM.readFloat(11);
-    Serial.printf("tempUpperLimit:%.2f\r\n", tempUpperLimit);
-    tempLowerLimit = EEPROM.readFloat(15);
-    Serial.printf("tempLowerLimit:%.2f\r\n", tempLowerLimit);
-    now_unixtime = EEPROM.readULong(39);
-    rtc.adjust(DateTime(now_unixtime));
-    Serial.printf("wakeup at unadjust: %d:%d:%d\r\n", rtc.now().hour(), rtc.now().minute(), rtc.now().second());
+    tempUpperLimit = EEPROM.readFloat(11); Serial.printf("tempUpperLimit:%.2f\r\n", tempUpperLimit);
+    tempLowerLimit = EEPROM.readFloat(15); Serial.printf("tempLowerLimit:%.2f\r\n", tempLowerLimit);
+    last_rec_stamp = (time_t)EEPROM.readLong(39);  Serial.printf("last_rec_stamp:%ld\r\n", last_rec_stamp);
     //处理时间
-    rtc.adjust(DateTime(now_unixtime + sleep_time_count / 1000000));
-    Serial.printf("wakeup at : %d:%d:%d\r\n", rtc.now().hour(), rtc.now().minute(), rtc.now().second());
-    Serial.printf("time now: %d-%d-%d %d:%d\r\n", rtc.now().year(), rtc.now().month(), rtc.now().day(), rtc.now().hour(), rtc.now().minute());
-    Serial.println(now_unixtime);
+    Serial.printf("time now: %d-%d-%d %d:%d:%d\r\n", now1.year, now1.month, now1.day,now1.hour, now1.minute, now1.second);
+ 
   }
 }
 
-void eeprom_config_set_sleeptime(time_t time1)
+void eeprom_config_save_parameter(void)
 {
-  EEPROM.writeInt(2, time1);
-  EEPROM.commit();
+   // EEPROM.write(1, 1);
+    EEPROM.writeInt(2, sleeptime);
+    // EEPROM.write(10, FACTORY_TEMP_LIMIT_ENABLE);
+    // EEPROM.writeFloat(11, FACTORY_TEMP_UPPER_LIMIT);
+    // EEPROM.writeFloat(15, FACTORY_TEMP_LOWER_LIMIT);
+    // EEPROM.writeInt(19, FACTORY_DATE_YEAR);
+    // EEPROM.writeInt(23, FACTORY_DATE_MONTH);
+    // EEPROM.writeInt(27, FACTORY_DATE_DAY);
+    // EEPROM.writeInt(31, FACTORY_TIME_HOUR);
+    // EEPROM.writeInt(35, FACTORY_TIME_MIN);
+    EEPROM.writeULong(39, last_rec_stamp);
+    EEPROM.commit();
+}
+void eeprom_config_read_parameter(void)
+{
+    Serial.println("this is not the first load");
+
+    sleeptime = (time_t)EEPROM.readLong(2);  Serial.printf("sleeptime:%ld\r\n", sleeptime);
+    tempLimit_enable = EEPROM.read(10) == 0 ? false : true;
+    tempUpperLimit = EEPROM.readFloat(11); Serial.printf("tempUpperLimit:%.2f\r\n", tempUpperLimit);
+    tempLowerLimit = EEPROM.readFloat(15); Serial.printf("tempLowerLimit:%.2f\r\n", tempLowerLimit);
+    last_rec_stamp = (time_t)EEPROM.readULong(39);  Serial.printf("last_rec_stamp:%ld\r\n", sleeptime);
 }

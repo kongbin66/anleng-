@@ -14,10 +14,17 @@ void codeForTask1(void *parameter)
 }
 
 void ds1302_task(void *parameter)
-{
+{  uint8_t sec=0;
    while(1)
    {
      ds_rtc.getDateTime(&now1);//读取时间参数到NOW
+     
+     if(now1.second==sec+1)
+     {
+        sys_sec++;
+       // Serial.printf("sec:%d\n",sys_sec);
+     }
+     sec=now1.second;
      vTaskDelay(500);
    }
    vTaskDelete(NULL);
@@ -36,7 +43,6 @@ void setup()
   hardware_init(); //硬件初始化
   software_init(); //软件初始化
   SerialMon.printf("/**************************************************************/\n");
-  
   //电量检测及欠压报警检测
   power_alarm_test();
 
@@ -60,15 +66,16 @@ void setup()
   }
 
   if (oledState == OLED_ON)
-   { showWelcome();
+   { 
+    showWelcome();
     postMsgId=0;//清记录条数
    }
   else 
   {
     if (workingState == WORKING && (esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_TIMER)) //不是开机，是定时唤醒。
     {
-      send_Msg_var_GSM_while_OLED_off(); //上传
       postMsgId++;
+      send_Msg_var_GSM_while_OLED_off(); //上传
       go_sleep_a_while_with_ext0();      //休眠
     }
   }
@@ -80,8 +87,6 @@ void setup()
 void loop()
 {
 
-  //Serial.printf("POWER_warning_flag=%d\r\n",POWER_warning_flag);
-  waking_update_time();
   if (oledState == OLED_ON)
   {
     sht20getTempAndHumi();
@@ -110,9 +115,10 @@ void send_Msg_var_GSM_while_OLED_off()
   onenet_connect();
   if (client.connected())
   {
-    char subscribeTopic[75];
+  
+    char subscribeTopic[75];//订阅主题
     char topicTemplate[] = "$sys/%s/%s/cmd/request/#"; //信息模板
-    snprintf(subscribeTopic, 75, topicTemplate, mqtt_pubid, mqtt_devid);
+    snprintf(subscribeTopic, sizeof(subscribeTopic), topicTemplate, mqtt_pubid, mqtt_devid);
     client.subscribe(subscribeTopic); //订阅命令下发主题
     sendTempAndHumi();
   }
@@ -121,8 +127,8 @@ void send_Msg_var_GSM_while_OLED_off()
   reduce_sleeptime = 0;
   delay(1000);
   digitalWrite(MODEM_POWER_ON, LOW); //关断800C电源
+  last_rec_stamp =unixtime();
 }
-
 
 
 
@@ -133,11 +139,18 @@ void send_Msg_var_GSM_while_OLED_off()
 
 void send_Msg_var_GSM_while_OLED_on()
 {
+ 
   if (workingState == WORKING)
   {
-    now_rec_stamp = millis();
-    if (now_rec_stamp - last_rec_stamp > sleeptime / 1000)
+      now_rec_stamp = unixtime();
+
+       Serial.println("now_rec_stamp:"+(String)now_rec_stamp);
+      Serial.println("last_rec_stamp:"+(String)last_rec_stamp);
+       Serial.println("Wake up time at:"+(String)(sleeptime-(now_rec_stamp - last_rec_stamp))+"seconds!" );
+    if (now_rec_stamp - last_rec_stamp > sleeptime )//发送间隔
     {
+      
+      
       screen_loopEnabled = false;
       key_attach_null();
       //上传
@@ -183,10 +196,11 @@ void send_Msg_var_GSM_while_OLED_on()
       delay(200);
       display.setTextAlignment(TEXT_ALIGN_LEFT);
       key_init();
-      last_rec_stamp = millis();
+      last_rec_stamp =unixtime();
       screen_loopEnabled = true;
-      screen_On_Start = millis();
-      screen_On_now = millis();
+      screen_On_Start = sys_sec;
+      screen_On_now = sys_sec;
+      
       alFFS_addRec();
       alFFS_readRecing();
       reduce_sleeptime = 0;

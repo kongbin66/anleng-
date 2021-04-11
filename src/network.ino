@@ -47,12 +47,12 @@ void modemToGPRS()
 /*-------------------------------获取位置信息-------------------------------------*/
 void getLBSLocation()
 {
-  int i;
+ 
   Serial.println("getting LBS...");
   float _locationE = 0, _locationN = 0, _locationA = 0; //地理位置,经度纬度
   int _timeLastNTP_Y = 0, _timeLastNTP_M = 0, _timeLastNTP_D = 0, _timeLastNTP_h = 0, _timeLastNTP_m = 0, _timeLastNTP_s = 0;
   modem.getGsmLocation(&_locationE, &_locationN, &_locationA, &_timeLastNTP_Y, &_timeLastNTP_M, &_timeLastNTP_D, &_timeLastNTP_h, &_timeLastNTP_m, &_timeLastNTP_s);
-  if (_locationE > 0.1)
+  if (_locationE > 0.1)//這是為什麼
   {
     locationE = _locationE;
     locationN = _locationN;
@@ -70,11 +70,6 @@ void getLBSLocation()
     timeNow_m = timeLastNTP_m;
     timeNow_s = timeLastNTP_s;
   }
-  rtc.adjust(DateTime(timeNow_Y, timeNow_M, timeNow_D, timeNow_h, timeNow_m, timeNow_s));
-  DateTime now = rtc.now();
-  now_unixtime = now.unixtime();
-  time_last_async_stamp = millis();
- Serial.println(timeNow_Y);
   //对时
    if(timeNow_Y!=0&&timeNow_M!=0&&timeNow_D!=0)//数据读出错误
     now1.year= timeNow_Y-2000;
@@ -85,6 +80,10 @@ void getLBSLocation()
     now1.second = timeNow_s;
     ds_rtc.setDateTime(&now1);
 
+  now_unixtime = 0;
+  time_last_async_stamp = sys_sec;
   EEPROM.writeULong(39, now_unixtime);
   EEPROM.commit();
+
+  
 }

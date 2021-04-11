@@ -206,7 +206,7 @@ void screen_loop()
 {
   if (screen_loopEnabled)
   {
-    loopnowTime = millis();
+    loopnowTime = sys_sec;
     looptimeSpan = loopnowTime - loopStartTime;
 
 
@@ -253,26 +253,29 @@ void screen_show()
     temp_humi_Scroll();
     break;
   case TIPS_SCREEN:
-    keyScreen_Now = millis();
+    keyScreen_Now = sys_sec;
     if (keyScreen_Now - keyScreen_Start < show_tip_screen_last)
       showTips_Screen();
     else
       screen_loopEnabled = true;
     break;
   case BLE_SCREEN:
-    keyScreen_Now = millis();
+    keyScreen_Now = sys_sec;
     if (keyScreen_Now - keyScreen_Start < show_BLE_screen_last)
       showBLEconnect_Screen();
     else
       screen_loopEnabled = true;
     break;
   case REC_START_SCREEN:
-    show_recStart_Screen();
+    
+    keyScreen_Now = sys_sec;
+    if(keyScreen_Now-keyScreen_Start<show_rec_stop_screen_last) show_recStart_Screen();
+    else  screen_loopEnabled=true;
+  
     break;
   case REC_STOP_SCREEN:
-    keyScreen_Now = millis();
-    if (keyScreen_Now - keyScreen_Start < show_rec_stop_screen_last)
-      show_recStop_Screen();
+    keyScreen_Now = sys_sec;
+    if (keyScreen_Now - keyScreen_Start < show_rec_stop_screen_last) show_recStop_Screen();
     else if (keyState != LONGPRESS_DURRING)
     {
       screen_loopEnabled = true;
@@ -284,14 +287,15 @@ void screen_show()
   }
 }
 
-
+//|| screenState == REC_STOP_SCREEN|| screenState == REC_START_SCREEN)
 
 
 void oled_on_off_switch()
 {
-  screen_On_now = millis();
-  Serial.println(screen_On_now - screen_On_Start);
-  if (screen_On_now - screen_On_Start > screen_On_last_span)
+  screen_On_now =sys_sec;
+  //Serial.println("time:"+(String)(screen_On_now - screen_On_Start));
+
+  if (screen_On_now - screen_On_Start > screen_On_last_span)//屏点亮时间超过设置（需要关屏）
   {
     if (oledState == OLED_ON)
     {

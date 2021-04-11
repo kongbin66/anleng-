@@ -13,12 +13,25 @@
 #include "SH1106Wire.h"
 #include "images.h"
 #include "OneButton.h"
-#include "RTClib.h"
 #include <Ds1302.h>
 
-
+uint32_t unixtime(void) ;
 #define DEBUG 1
+uint32_t sys_sec=0;
+#define EEPROM_QZ 1//强制设置睡眠时长
 
+/*-------------------------------出厂设置定义-------------------------------------*/
+
+#define FACTORY_SLEEPTIME   30     // 300000000    //休眠时间        只适用一次
+
+#define FACTORY_TEMP_LIMIT_ENABLE 0    //出厂温度上下限失能
+#define FACTORY_TEMP_UPPER_LIMIT 50.0  //出厂温度上限
+#define FACTORY_TEMP_LOWER_LIMIT -40.0 //出厂温度下限
+#define FACTORY_DATE_YEAR 1970         //出厂默认时间
+#define FACTORY_DATE_MONTH 1           //出厂默认时间
+#define FACTORY_DATE_DAY 1             //出厂默认时间
+#define FACTORY_TIME_HOUR 0            //出厂默认时间
+#define FACTORY_TIME_MIN 0             //出厂默认时间
 
 
 /*-------------------------------SIM800L 硬件定义----------------------------------*/
@@ -39,7 +52,7 @@
 #define BATTERY_ADC_PIN  4     //电量ADC采集管脚后续改到ADC1上，避免影响WIFI
 //创建DS1302对象
 Ds1302 ds_rtc(PIN_ENA, PIN_CLK, PIN_DAT);
-RTC_Millis rtc;
+//RTC_Millis rtc;
 
 Ds1302::DateTime now1;//ds1302读取的时间
 /*-------------------------------显示/按键相关定义-------------------------------------*/
@@ -62,8 +75,8 @@ SH1106Wire display(0x3c, 21, 22);
 #define TEMP_HUMI_SCROLL_SCREEN 6
 #define HUMI_TEMP_SCROLL_SCREEN 7
 #define SETTING_SUCCESS 8
-#define REC_START_SCREEN 9
-#define REC_STOP_SCREEN 10
+#define REC_START_SCREEN 9 //开始记录
+#define REC_STOP_SCREEN 10//停止记录
 #define REC_COUNT_SCREEN 11
 //state of key
 #define NOKEYDOWN 0
@@ -100,16 +113,7 @@ time_t show_rec_stop_screen_last;      //停止测量界面自动返回的时间
 time_t last_rec_stamp;                 //上次记录时间
 time_t now_rec_stamp;                  //计算现在记录时间
 
-/*-------------------------------出厂设置定义-------------------------------------*/
-#define FACTORY_SLEEPTIME 300000000    //休眠时间
-#define FACTORY_TEMP_LIMIT_ENABLE 0    //出厂温度上下限失能
-#define FACTORY_TEMP_UPPER_LIMIT 50.0  //出厂温度上限
-#define FACTORY_TEMP_LOWER_LIMIT -40.0 //出厂温度下限
-#define FACTORY_DATE_YEAR 1970         //出厂默认时间
-#define FACTORY_DATE_MONTH 1           //出厂默认时间
-#define FACTORY_DATE_DAY 1             //出厂默认时间
-#define FACTORY_TIME_HOUR 0            //出厂默认时间
-#define FACTORY_TIME_MIN 0             //出厂默认时间
+
 
 //设备码
 #if 1
@@ -233,10 +237,10 @@ void sendTempAndHumi();
 void go_sleep_a_while_with_ext0();//进入休眠
 
 /*--------------------------------eeprom相关函数--------------------*/
-#define EEPROM_QZ 0//强制设置睡眠时长
+
 void get_eeprom_firstBootFlag();
 void eeprom_config_init();
-void eeprom_config_set_sleeptime(time_t time1);
+void eeprom_config_save_parameter(void);
 /*********************************SPIFFS相关函数 al_FFS.ino**********/
 void alFFS_init();
 void alFFS_addRec();

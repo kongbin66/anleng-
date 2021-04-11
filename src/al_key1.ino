@@ -2,8 +2,10 @@
 
 void nullfunc()
 {
-  screen_On_Start = millis();
-  screen_On_now = millis();
+  // screen_On_Start = millis();
+  // screen_On_now = millis();
+    screen_On_Start = sys_sec;
+    screen_On_now = sys_sec;
 }
 void doubleclick()
 {
@@ -13,8 +15,9 @@ void doubleclick()
     keyState = DOUBLECLICK;
   }
 
-  screen_On_Start = millis();
-  screen_On_now = millis();
+
+  screen_On_Start = sys_sec;
+    screen_On_now = sys_sec;
 }
 void click()
 {
@@ -23,8 +26,9 @@ void click()
     Serial.println("click");
     keyState = CLICK;
   }
-  screen_On_Start = millis();
-  screen_On_now = millis();
+
+  screen_On_Start = sys_sec;
+    screen_On_now = sys_sec;
 }
 void longPressStart()
 {
@@ -33,30 +37,33 @@ void longPressStart()
     Serial.println("longPressStart");
     keyState = LONGPRESS_START;
   }
-  screen_On_Start = millis();
-  screen_On_now = millis();
+    screen_On_Start = sys_sec;
+    screen_On_now = sys_sec;
 }
 void duringLongPress()
 {
   if (oledState == OLED_ON)
   {
-    screen_On_Start = millis();
-    screen_On_now = millis();
+   
+    screen_On_Start = sys_sec;
+    screen_On_now = sys_sec;
   }
   if (button.isLongPressed())
   {
     Serial.print("duringLongPress:");
     Serial.println(button.getPressedTicks());
-    keyScreen_Start = millis(); //处理长按界面下的长按
-    keyScreen_Now = millis();   //处理长按界面下的长按
+    keyScreen_Start = sys_sec; //处理长按界面下的长按
+    keyScreen_Now = sys_sec;   //处理长按界面下的长按
     delay(50);
     keyState = LONGPRESS_DURRING;
   }
 }
 void longPressStop()
 {
-  screen_On_Start = millis();
-  screen_On_now = millis();
+  // screen_On_Start = millis();
+  // screen_On_now = millis();
+  screen_On_Start = sys_sec;
+    screen_On_now = sys_sec;
   Serial.println("longPressStop");
   keyState = LONGPRESS_END;
 }
@@ -69,11 +76,11 @@ void key_loop()
     {
       screen_loopEnabled = false;
       screenState = TIPS_SCREEN;
-      keyScreen_Start = millis();
-      keyScreen_Now = millis();
+      keyScreen_Start = sys_sec;
+      keyScreen_Now = sys_sec;
       keyState = NOKEYDOWN;
     }
-    else if (screenState == TIPS_SCREEN || screenState == BLE_SCREEN || screenState == REC_STOP_SCREEN)
+    else if (screenState == TIPS_SCREEN || screenState == BLE_SCREEN || screenState == REC_STOP_SCREEN|| screenState == REC_START_SCREEN)
     {
       screen_loopEnabled = true;
       Serial.println("anjianfanhui");
@@ -85,8 +92,8 @@ void key_loop()
     {
       screen_loopEnabled = false;
       screenState = BLE_SCREEN;
-      keyScreen_Start = millis();
-      keyScreen_Now = millis();
+      keyScreen_Start = sys_sec;
+      keyScreen_Now = sys_sec;
       keyState = NOKEYDOWN;
     }
     break;
@@ -100,8 +107,8 @@ void key_loop()
         workingState = WORKING;
         current_rec_State = START_RECING;
         alFFS_thisRec_firstData_flag = true;
-        last_rec_stamp = millis() - sleeptime / 1000 + 2000;
-        now_rec_stamp = millis();
+        last_rec_stamp = unixtime();//- sleeptime / 1000 + 2000;
+        now_rec_stamp = sys_sec;
         Serial.println("workingState = WORKING;");
         keyState = NOKEYDOWN;
       }
@@ -113,8 +120,8 @@ void key_loop()
         current_rec_State = END_RECING;
         alFFS_endRec();
         Serial.println("workingState = NOT_WORKING;");
-        keyScreen_Start = millis();
-        keyScreen_Now = millis();
+        keyScreen_Start = sys_sec;
+        keyScreen_Now = sys_sec;
         keyState = NOKEYDOWN;
       }
     }
