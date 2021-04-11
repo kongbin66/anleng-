@@ -18,7 +18,24 @@
 uint32_t unixtime(void) ;
 #define DEBUG 1
 uint32_t sys_sec=0;
-#define EEPROM_QZ 1//强制设置睡眠时长
+#define EEPROM_QZ 0//强制设置睡眠时长
+
+/********************电量采集相关*************************************/
+
+#define IP5306_ADDR 0x75
+#define IP5306_REG_SYS_CTL0 0x00
+#define Power_min_voltage 1.2//设定最小关机电压
+
+float bat_mv;//电池电压
+uint8_t POWER_warning_flag;//电压报警标志 0：正常 1：欠压
+extern const char *p1;//电量图标显示
+
+void PowerManagment();//保持升压芯片持续工作
+int8_t getBatteryLevel();//检测电池电量等级
+int8_t fun_Refresh_lcon(int8_t x); //刷新更改图标
+float getBatteryFromADC();/* //读取电池端实时电压*/
+void power_alarm_test();//电量检测与电量低报警检测
+void Power_test(float );  //确定电量最小值
 
 /*-------------------------------出厂设置定义-------------------------------------*/
 
@@ -44,12 +61,14 @@ uint32_t sys_sec=0;
 #define PIN_ENA 5
 #define PIN_CLK 19
 #define PIN_DAT 18
+//LED管脚
+#define LED 33
 /*-------------------------------其他硬件定义-------------------------------------*/
 #define SerialMon Serial      //调试串口为UART0
 #define SerialAT  Serial1      //AT串口为UART1
 #define KEY1      14            //按键1对应引脚
 #define WEAKUPKEY1 GPIO_NUM_14 //按键1对应引脚
-#define BATTERY_ADC_PIN  4     //电量ADC采集管脚后续改到ADC1上，避免影响WIFI
+#define BATTERY_ADC_PIN  36    //电量ADC采集管脚后续改到ADC1上，避免影响WIFI
 //创建DS1302对象
 Ds1302 ds_rtc(PIN_ENA, PIN_CLK, PIN_DAT);
 //RTC_Millis rtc;
@@ -110,7 +129,7 @@ time_t screen_Off_to_sleep_span;       //息屏到休眠时间间隔
 time_t show_tip_screen_last;           //提示界面自动返回的时间
 time_t show_BLE_screen_last;           //蓝牙界面自动返回的时间
 time_t show_rec_stop_screen_last;      //停止测量界面自动返回的时间
-time_t last_rec_stamp;                 //上次记录时间
+time_t last_rec_stamp;                 //上次休眠时间
 time_t now_rec_stamp;                  //计算现在记录时间
 
 
@@ -147,6 +166,7 @@ const int port = 1883;                     //端口号
 //温湿度采集相关
 float currentTemp;
 float currentHumi;
+//F_温湿度读取标志
 bool tempAndHumi_Ready;
 bool timeNTPdone;
 //判断是否第一次启动
@@ -169,7 +189,6 @@ RTC_DATA_ATTR bool tempLimit_enable;                 //温度上下限报警开�
 RTC_DATA_ATTR float tempUpperLimit;                  //温度上限设定
 RTC_DATA_ATTR float tempLowerLimit;                  //温度下限设定
 RTC_DATA_ATTR time_t sleeptime;                      //休眠时间
-RTC_DATA_ATTR time_t reduce_sleeptime;               //缩减休眠时间
 RTC_DATA_ATTR time_t sleep_start_time;               //休眠开始时间
 RTC_DATA_ATTR time_t sleep_end_time;                 //休眠结束时间
 RTC_DATA_ATTR time_t sleep_time_count;               //休眠时长时间
@@ -182,7 +201,7 @@ RTC_DATA_ATTR bool alFFS_thisRec_firstData_flag; //本次记录第一次上传
 RTC_DATA_ATTR char nowREC_filepath[21];          //记录文件的路径
 /*-------------------------------系统时间定义-------------------------------------*/
 RTC_DATA_ATTR uint32_t now_unixtime;//现在系统时间
-// RTC_DATA_ATTR int64_t now_unixtime64;
+
 time_t time_last_async_stamp;//上一次的时间戳
 
 /*-------------------------------初始化相关init.ino-------------------------------------*/
@@ -261,26 +280,9 @@ void key_loop();
 void key_attach_null();
 void oledoff_upload_but_click();
 /*********************************对时相关函数 al_time.ino***********/
-
-void sleep_update_time();
 void wakeup_init_time();
 void waking_update_time();
-/********************电量采集相关*************************************/
-#define ADC_BAT 36// TCALL 35
-#define IP5306_ADDR 0x75
-#define IP5306_REG_SYS_CTL0 0x00
-#define Power_min_voltage 1.2//设定最小关机电压
 
-float bat_mv;//电池电压
-uint8_t POWER_warning_flag;//电压报警标志 0：正常 1：欠压
-extern const char *p1;//电量图标显示
-
-void PowerManagment();//保持升压芯片持续工作
-int8_t getBatteryLevel();//检测电池电量等级
-int8_t fun_Refresh_lcon(int8_t x); //刷新更改图标
-float getBatteryFromADC();/* //读取电池端实时电压*/
-void power_alarm_test();//电量检测与电量低报警检测
-void Power_test(float );  //确定电量最小值
 /*********************时间相关**************************************************/
 
 //Ds1302 rtc1=Ds1302(PIN_ENA, PIN_CLK, PIN_DAT);

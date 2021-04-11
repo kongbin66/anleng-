@@ -80,10 +80,9 @@ void getLBSLocation()
     now1.second = timeNow_s;
     ds_rtc.setDateTime(&now1);
 
-  now_unixtime = 0;
-  time_last_async_stamp = sys_sec;
-  EEPROM.writeULong(39, now_unixtime);
-  EEPROM.commit();
+  now_unixtime = unixtime();
+  time_last_async_stamp = unixtime();
+ 
 
   
 }

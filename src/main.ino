@@ -25,7 +25,10 @@ void ds1302_task(void *parameter)
        // Serial.printf("sec:%d\n",sys_sec);
      }
      sec=now1.second;
-     vTaskDelay(500);
+     digitalWrite(34,HIGH); 
+     vTaskDelay(250);
+     digitalWrite(34,LOW); 
+     vTaskDelay(250);
    }
    vTaskDelete(NULL);
 }
@@ -42,9 +45,8 @@ void setup()
   
   hardware_init(); //硬件初始化
   software_init(); //软件初始化
-  SerialMon.printf("/**************************************************************/\n");
-  //电量检测及欠压报警检测
-  power_alarm_test();
+  
+  
 
    xTaskCreate( ds1302_task,"ds1302_task",2000,NULL,1,&ds_task);//创建DS1302任务
    xTaskCreatePinnedToCore(codeForTask1,"task1",1000,NULL,1, &task1,0);  
@@ -63,6 +65,7 @@ void setup()
     get_eeprom_firstBootFlag();           //获取EEPROM第1位,判断是否是初次开机
     alFFS_init();                         //初始化FFS
     eeprom_config_init();                 //初始化EEPROM
+    wakeup_init_time();
   }
 
   if (oledState == OLED_ON)
@@ -86,7 +89,10 @@ void setup()
 
 void loop()
 {
-
+  if(POWER_warning_flag)
+  {
+    Serial.println("dianliaodi!");
+  }
   if (oledState == OLED_ON)
   {
     sht20getTempAndHumi();
@@ -124,7 +130,7 @@ void send_Msg_var_GSM_while_OLED_off()
   }
   alFFS_addRec();
   alFFS_readRecing();
-  reduce_sleeptime = 0;
+  
   delay(1000);
   digitalWrite(MODEM_POWER_ON, LOW); //关断800C电源
   last_rec_stamp =unixtime();
@@ -144,12 +150,12 @@ void send_Msg_var_GSM_while_OLED_on()
   {
       now_rec_stamp = unixtime();
 
-       Serial.println("now_rec_stamp:"+(String)now_rec_stamp);
-      Serial.println("last_rec_stamp:"+(String)last_rec_stamp);
-       Serial.println("Wake up time at:"+(String)(sleeptime-(now_rec_stamp - last_rec_stamp))+"seconds!" );
+       
+      Serial.println("GSM transmission will start at:"+(String)(sleeptime-(now_rec_stamp - last_rec_stamp)) );
     if (now_rec_stamp - last_rec_stamp > sleeptime )//发送间隔
     {
-      
+      Serial.println("now_rec_stamp:"+(String)now_rec_stamp);
+      Serial.println("last_rec_stamp:"+(String)last_rec_stamp);
       
       screen_loopEnabled = false;
       key_attach_null();
@@ -203,7 +209,7 @@ void send_Msg_var_GSM_while_OLED_on()
       
       alFFS_addRec();
       alFFS_readRecing();
-      reduce_sleeptime = 0;
+     
       postMsgId++;
     }
     

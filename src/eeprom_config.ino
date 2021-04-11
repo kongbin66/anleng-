@@ -58,7 +58,7 @@ void eeprom_config_init()
   }
   else
   {
-    if(EEPROM_QZ) EEPROM.writeInt(2, FACTORY_SLEEPTIME);//KB:强制设置睡眠时间间隔。
+    // EEPROM.writeInt(2, FACTORY_SLEEPTIME);//KB:强制设置睡眠时间间隔。
 
     Serial.println("this is not the first load");
 
@@ -87,14 +87,4 @@ void eeprom_config_save_parameter(void)
     // EEPROM.writeInt(35, FACTORY_TIME_MIN);
     EEPROM.writeULong(39, last_rec_stamp);
     EEPROM.commit();
-}
-void eeprom_config_read_parameter(void)
-{
-    Serial.println("this is not the first load");
-
-    sleeptime = (time_t)EEPROM.readLong(2);  Serial.printf("sleeptime:%ld\r\n", sleeptime);
-    tempLimit_enable = EEPROM.read(10) == 0 ? false : true;
-    tempUpperLimit = EEPROM.readFloat(11); Serial.printf("tempUpperLimit:%.2f\r\n", tempUpperLimit);
-    tempLowerLimit = EEPROM.readFloat(15); Serial.printf("tempLowerLimit:%.2f\r\n", tempLowerLimit);
-    last_rec_stamp = (time_t)EEPROM.readULong(39);  Serial.printf("last_rec_stamp:%ld\r\n", sleeptime);
 }

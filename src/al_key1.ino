@@ -2,8 +2,7 @@
 
 void nullfunc()
 {
-  // screen_On_Start = millis();
-  // screen_On_now = millis();
+  
     screen_On_Start = sys_sec;
     screen_On_now = sys_sec;
 }
@@ -14,10 +13,8 @@ void doubleclick()
     Serial.println("doubleclick");
     keyState = DOUBLECLICK;
   }
-
-
   screen_On_Start = sys_sec;
-    screen_On_now = sys_sec;
+  screen_On_now = sys_sec;
 }
 void click()
 {
@@ -26,7 +23,6 @@ void click()
     Serial.println("click");
     keyState = CLICK;
   }
-
   screen_On_Start = sys_sec;
     screen_On_now = sys_sec;
 }
@@ -107,8 +103,8 @@ void key_loop()
         workingState = WORKING;
         current_rec_State = START_RECING;
         alFFS_thisRec_firstData_flag = true;
-        last_rec_stamp = unixtime();//- sleeptime / 1000 + 2000;
-        now_rec_stamp = sys_sec;
+        last_rec_stamp = unixtime();
+        now_rec_stamp = unixtime();
         Serial.println("workingState = WORKING;");
         keyState = NOKEYDOWN;
       }

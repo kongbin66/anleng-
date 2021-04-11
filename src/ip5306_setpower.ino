@@ -35,14 +35,13 @@ float getBatteryFromADC()
   uint32_t oversample = 0;
   for (size_t i = 0; i < 100; i++)
   {
-    oversample += (uint32_t)analogRead(ADC_BAT);
+    oversample += (uint32_t)analogRead(BATTERY_ADC_PIN );
   }
   bat_mv = (int)oversample / 100;
-  bat_mv = ((float)bat_mv / 4096) * 3.35 * 2 + 0.4;
+  bat_mv = ((float)bat_mv / 4096) * 3.35 * 2 ;
 
   Serial.println(String("Battery from ADC: ") + bat_mv + String("V"));
   Serial.println(F("------------POWER-------------"));
-  Serial.println();
   return bat_mv;
 }
 
@@ -134,8 +133,7 @@ void power_alarm_test()
     SerialMon.print(".");
     delay(500);
   }
-  SerialMon.println();
-  SerialMon.println("power_test[ok!]");
+  SerialMon.println(F("power_test[ok!]"));
   //刷新屏幕显示电量
   fun_Refresh_lcon(i);
   if (i <= 25)
