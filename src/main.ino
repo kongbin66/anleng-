@@ -1,4 +1,9 @@
 #include "config.h"
+
+TaskHandle_t task1; //第二核创建一个任务句柄
+TaskHandle_t ds_task;
+TaskHandle_t xieyi_task;
+
 int rollback = 0;
 
 //第二核创建任务代码
@@ -25,7 +30,7 @@ void ds1302_task(void *parameter)
        // Serial.printf("sec:%d\n",sys_sec);
      }
      sec=now1.second;
-     digitalWrite(34,HIGH); 
+     digitalWrite(LED,HIGH); 
      vTaskDelay(250);
      digitalWrite(34,LOW); 
      vTaskDelay(250);
@@ -33,7 +38,15 @@ void ds1302_task(void *parameter)
    vTaskDelete(NULL);
 }
 
-
+void xieyi_Task(void *parameter)
+{
+  while (1) //这是核1 的loop
+  {
+    xieyi_scan();
+    vTaskDelay(100);
+  }
+   vTaskDelete(NULL);
+}
 
 
 
@@ -47,9 +60,9 @@ void setup()
   software_init(); //软件初始化
   
   
-
-   xTaskCreate( ds1302_task,"ds1302_task",2000,NULL,1,&ds_task);//创建DS1302任务
-   xTaskCreatePinnedToCore(codeForTask1,"task1",1000,NULL,1, &task1,0);  
+   xTaskCreate( xieyi_Task,"xieyi_Task",3000,NULL,2,&xieyi_task);//创建DS1302任务
+   xTaskCreate( ds1302_task,"ds1302_task",2000,NULL,2,&ds_task);//创建DS1302任务
+   xTaskCreatePinnedToCore(codeForTask1,"task1",1000,NULL,2, &task1,0);  
   if (rollback)
   {
     /*************如果rollback置1, 会恢复出厂设置,数据全清***********/
@@ -215,10 +228,24 @@ void send_Msg_var_GSM_while_OLED_on()
     
   }
   digitalWrite(MODEM_POWER_ON, LOW);
+  
 }
-
-
-
+//设置休眠时间：（S）
+void SET_SLEEPTIME(time_t t)
+{
+    sleeptime= t;
+    eeprom_config_save_parameter();
+    sleeptime = (time_t)EEPROM.readLong(2);  Serial.printf("sleeptime:%ld\r\n", sleeptime);
+}
+//设置亮屏时间和息屏到休眠时间
+void SET_Last_span_Sleep_span(int x,int y)
+{
+    screen_On_last_span=x;
+    screen_Off_to_sleep_span=y;
+    eeprom_config_save_parameter();
+    screen_On_last_span = (time_t)EEPROM.readInt(43);      Serial.printf("screen_On_last_span:%ld\r\n", screen_On_last_span);
+    screen_Off_to_sleep_span = (time_t)EEPROM.readInt(47); Serial.printf("screen_Off_to_sleep_span:%ld\r\n", screen_Off_to_sleep_span);
+}
 
 
 

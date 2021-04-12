@@ -206,7 +206,7 @@ void screen_loop()
 {
   if (screen_loopEnabled)
   {
-    loopnowTime = sys_sec;
+    loopnowTime = millis();
     looptimeSpan = loopnowTime - loopStartTime;
 
 

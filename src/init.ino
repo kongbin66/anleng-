@@ -10,8 +10,8 @@ void hardware_init()
   digitalWrite(13,LOW); 
   pinMode     (MODEM_POWER_ON, OUTPUT); //电源引脚
   digitalWrite(MODEM_POWER_ON,LOW);
-  pinMode     (34, OUTPUT); //LED引脚
-  digitalWrite(34,LOW); 
+  pinMode     (33, OUTPUT); //LED引脚
+  digitalWrite(33,LOW); 
   
 
   //保持升压芯片持续工作
@@ -19,7 +19,7 @@ void hardware_init()
   //电量检测及欠压报警检测
   power_alarm_test();
   adcAttachPin(BATTERY_ADC_PIN); //将引脚连接到ADC
-  adcStart(BATTERY_ADC_PIN);     //在连接的引脚总线上开始ADC转换
+  //adcStart(BATTERY_ADC_PIN);     //在连接的引脚总线上开始ADC转换
 
   bool i;
   //初始化DS1302引脚
@@ -51,13 +51,13 @@ void software_init()//軟件初始化
   tempAndHumi_Ready = false;
   Serial.printf("workingState:%d\r\n", workingState);
   Serial.printf("oledState:%d\r\n", oledState);
-  loopStartTime = sys_sec;
+  loopStartTime = millis();
   screen_loopEnabled = true;
+  //下面是固定参数，需要修改时再保存到EEPROM中
   show_tip_screen_last = 3;
   show_BLE_screen_last = 8;
   show_rec_stop_screen_last = 2;
-  screen_On_last_span = 10;
-  screen_Off_to_sleep_span = 3;
+
   
   screen_On_Start = sys_sec;
   screen_On_now = sys_sec;

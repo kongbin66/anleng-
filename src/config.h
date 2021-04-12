@@ -14,11 +14,10 @@
 #include "images.h"
 #include "OneButton.h"
 #include <Ds1302.h>
+#include "xieyi.h"
 
 uint32_t unixtime(void) ;
-#define DEBUG 1
 uint32_t sys_sec=0;
-#define EEPROM_QZ 0//强制设置睡眠时长
 
 /********************电量采集相关*************************************/
 
@@ -109,8 +108,7 @@ SH1106Wire display(0x3c, 21, 22);
 #define END_RECING 1
 #define KEEP_RECING 2
 
-TaskHandle_t task1; //第二核创建一个任务句柄
-TaskHandle_t ds_task;
+
 RTC_DATA_ATTR int workingState;        //工作状态机
 RTC_DATA_ATTR int keyState;            //按键状态机
 RTC_DATA_ATTR int oledState;           //OLED工作状态机
@@ -285,7 +283,7 @@ void waking_update_time();
 
 /*********************时间相关**************************************************/
 
-//Ds1302 rtc1=Ds1302(PIN_ENA, PIN_CLK, PIN_DAT);
+void SET_SLEEPTIME(time_t t);
 
 
 
