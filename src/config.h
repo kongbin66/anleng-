@@ -16,6 +16,7 @@
 #include <Ds1302.h>
 #include "xieyi.h"
 
+
 uint32_t unixtime(void) ;
 uint32_t sys_sec=0;
 
@@ -104,8 +105,11 @@ SH1106Wire display(0x3c, 21, 22);
 #define LONGPRESS_END 4
 #define LONGPRESS_DURRING 5
 //state of rec_State
+//开始记录
 #define START_RECING 0
+//结束记录
 #define END_RECING 1
+//连续记录
 #define KEEP_RECING 2
 
 
@@ -133,7 +137,7 @@ time_t now_rec_stamp;                  //计算现在记录时间
 
 
 //设备码
-#if 1
+#if 0
 const char *mqtt_server = "218.201.45.7"; //onenet 的 IP地址
 const int port = 1883;                     //端口号
 #define mqtt_devid "al_kh00001_zx_0001"         //设备ID
@@ -151,7 +155,7 @@ const int port = 1883;                     //端口号
 #define mqtt_password "version=2018-10-31&res=products%2F4LwKzUwOpX%2Fdevices%2Fal_kh00001_zx_0002&et=4092599349&method=md5&sign=FxSayE%2BpBzK9L1YgXt8rxA%3D%3D"
 #endif
 
-#if 0
+#if 1
 const char *mqtt_server = "218.201.45.7"; //onenet 的 IP地址
 const int port = 1883;                     //端口号
 #define mqtt_devid "al_kh00001_zx_0003"         //设备ID
@@ -197,6 +201,8 @@ RTC_DATA_ATTR int timeLastNTP_Y, timeLastNTP_M, timeLastNTP_D, timeLastNTP_h, ti
 /*-------------------------------SPIFFS定义-------------------------------------*/
 RTC_DATA_ATTR bool alFFS_thisRec_firstData_flag; //本次记录第一次上传
 RTC_DATA_ATTR char nowREC_filepath[21];          //记录文件的路径
+RTC_DATA_ATTR char loseREC_filepath[21];//
+RTC_DATA_ATTR char lose2REC_filepath[21];//
 /*-------------------------------系统时间定义-------------------------------------*/
 RTC_DATA_ATTR uint32_t now_unixtime;//现在系统时间
 
@@ -219,7 +225,7 @@ PubSubClient client(gsmclient);
 
 void setupModem();
 void modemToGPRS();
-void getLBSLocation();
+bool getLBSLocation();
 // /*-------------------------------ali_mqtt服务相关ali_mqtt.ino---------------------*/
 // void ali_mqtt_connect();
 // void ali_callback(char *topic, byte *payload, unsigned int length);
@@ -241,7 +247,7 @@ void getLBSLocation();
 
 //这是post上传数据使用的模板
 #define ONENET_POST_BODY_FORMAT "{\"id\":\"1\",\"params\":%s}"
-
+#define ONENET_POST_BODY_FORMAT2 "%s"
 
 
 // char msgJson[256]; //要发送的json格式的数据
@@ -284,7 +290,15 @@ void waking_update_time();
 /*********************时间相关**************************************************/
 
 void SET_SLEEPTIME(time_t t);
-
-
-
+//文件系统，如果挂载失败，格式化文件系统
+#define FORMAT_SPIFFS_IF_FAILED true//
+//文件系统挂载成功标志
+bool f_ffsok=0;
+bool f_Flight_Mode=0;//飞行模式标志
+bool f_GSMOK=0;//网络通断标志
+bool f_lose=0;//漏传文件标志
+void appendFile(fs::FS &fs, const char * path, String message);
+int writeFile(fs::FS &fs, const char * path, const char * message);
+void readFile(fs::FS &fs, const char * path);
+void listDir(fs::FS &fs, const char * dirname, uint8_t levels);
 #endif // CONFIG_H
