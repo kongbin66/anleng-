@@ -1,8 +1,25 @@
 {
-  "id": 123,
-  "dp": {
-    "temp": [{ "v": 25.31 }],
-    "humi": [{ "v": 49.15 }],
-    "location": [{ "v": { "lon": 112.40832, "lat": 34.636055 } }]
-  }
+  "id": "1",
+  "params":
+  [ 
+    {
+                
+                "temp": { "value": 1},
+                "humi": {"value": 1},
+                "le": {"value": 1},
+                "ln": {"value": 1},
+                "time": {"value": 1 }
+     }
+ //下面是第二次发送    
+     ,{        
+      "temp": { "value": 1},
+      "humi": {"value": 1},
+      "le": {"value": 1},
+      "ln": {"value": 1},
+      "time": {"value": 1 }
+     }
+  //读取时发下面   
+  ]
 }
+
+{\"id\": \"1\",   \"params\":   [      {                                  \"temp\": { \"value\": 1},                 \"humi\": {\"value\": 1},                 \"le\": {\"value\": 1},                 \"ln\": {\"value\": 1},                 \"time\": {\"value\": 1 }      }       ,{               \"temp\": { \"value\": 1},       \"humi\": {\"value\": 1},       \"le\": {\"value\": 1},       \"ln\": {\"value\": 1},       \"time\": {\"value\": 1 }      }       ] }

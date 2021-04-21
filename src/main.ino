@@ -399,26 +399,7 @@ void send_Msg_var_GSM_while_OLED_on2()
 // }
 
 //
-//文本记录格式 
-// {
-//   "id":"1",
-//   "params":
-//           {
-//           "temp":{"value":34.83},
-//           "humi":{"value":15.54},
-//           "le":{"value":117.62},
-//           "ln":{"value":35.90},
-//           "start_time":{"value":1618754516000}
-//           }
-// }
-//  String strtempx = "{\"st\":\"" + (String)tempStr +
-//                            "\",\"data\": [{\"tm\":\"" + (String)tempStr +
-//                            "\",\"tmsp\":" + (String)(unixtime()) + //- 8 * 60 * 60
-//                            ",\"tp\":" + (String)currentTemp +
-//                            ",\"h\":" + (String)currentHumi +
-//                            ",\"E\":" + (String)locationE +
-//                            ",\"N\":" + (String)locationN +
-//                            "}";
+
 
                            
 
@@ -515,11 +496,7 @@ void sendTempAndHumi2()
 }
 
 
-void testx()
-{
-   alFFS_addRec();
 
-}
 void test()
 {
   String strtemp = "{\"st\":\"" + (String)tempStr +
@@ -564,4 +541,32 @@ void test5(uint8_t f_one)//读文件辨认条目
   //读取文件
   readFile(SPIFFS,  "/lose.json");
 
+}
+
+
+
+//文本记录格式 
+// {
+//   "id":"1",
+//   "params":
+//           {
+//           "temp":{"value":34.83},
+//           "humi":{"value":15.54},
+//           "le":{"value":117.62},
+//           "ln":{"value":35.90},
+//           "start_time":{"value":1618754516000}
+//           }
+// }
+//  String strtempx = "{\"st\":\"" + (String)tempStr +
+//                            "\",\"data\": [{\"tm\":\"" + (String)tempStr +
+//                            "\",\"tmsp\":" + (String)(unixtime()) + //- 8 * 60 * 60
+//                            ",\"tp\":" + (String)currentTemp +
+//                            ",\"h\":" + (String)currentHumi +
+//                            ",\"E\":" + (String)locationE +
+//                            ",\"N\":" + (String)locationN +
+//                            "}";
+void testx(bool x)//写漏發文件
+{
+
+   
 }

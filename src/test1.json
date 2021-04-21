@@ -1,0 +1,22 @@
+{
+    "id": "1",
+    "params": [
+        {
+            "temp": {
+                "value": 0.00
+            },
+            "humi": {
+                "value": 0.00
+            },
+            "le": {
+                "value": 0.00
+            },
+            "ln": {
+                "value": 0.00
+            },
+            "time": {
+                "value": 0
+            }
+        }
+    ]
+}

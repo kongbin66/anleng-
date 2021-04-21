@@ -298,7 +298,9 @@ bool f_Flight_Mode=0;//飞行模式标志
 bool f_GSMOK=0;//网络通断标志
 bool f_lose=0;//漏传文件标志
 void appendFile(fs::FS &fs, const char * path, String message);
-int writeFile(fs::FS &fs, const char * path, const char * message);
+int writeFile(fs::FS &fs, const char * path, String message);
 void readFile(fs::FS &fs, const char * path);
 void listDir(fs::FS &fs, const char * dirname, uint8_t levels);
+void alFFS_Writelist(bool x);//写正常记录文件
+
 #endif // CONFIG_H

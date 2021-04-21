@@ -3,22 +3,24 @@
  void SET_SLEEPTIME(time_t t);
  //设置亮屏时间和息屏到休眠时间
 void SET_Last_span_Sleep_span(int x,int y);
-void test2();
-void test3();
-void test();
-void test4();
-void test5(uint8_t );
-void testx();
+void test2();//目录
+void test3();//格式化
+
+void test4();//重写俩文件
+void test5(uint8_t );//读文件辨认条目
+void testx(bool);
+
 //2.填写指令参数格式
   NAME_TAB name_tab[]=
  {
 	  (void*)SET_SLEEPTIME,                                   {0xaa,0x00, 1, 1, 1, 1, 0, 0,0,0, 0xbb},
       (void*)SET_Last_span_Sleep_span,                        {0xaa,0x01, 1, 1, 1, 1, 2, 2,2,2, 0xbb},
-      (void*)test,                                            {0xaa,0x02, 0, 0, 0, 0, 0, 0,0,0, 0xbb},
-	   (void*)test2,                                            {0xaa,0x03, 0, 0, 0, 0, 0, 0,0,0, 0xbb},
-	    (void*)test3,                                            {0xaa,0x04, 0, 0, 0, 0, 0, 0,0,0, 0xbb},
+   
+	   (void*)test2,                                            {0xaa,0x02, 0, 0, 0, 0, 0, 0,0,0, 0xbb},
+	    (void*)test3,                                            {0xaa,0x03, 0, 0, 0, 0, 0, 0,0,0, 0xbb},
+		(void*)test4,                                            {0xaa,0x04, 1, 0, 0, 0, 0, 0,0,0, 0xbb},
 		(void*)test5,                                            {0xaa,0x05, 1, 0, 0, 0, 0, 0,0,0, 0xbb},
-		(void*)testx,                                            {0xaa,0x06, 1, 0, 0, 0, 0, 0,0,0, 0xbb},
+		(void*)testx,                                            {0xaa,0xff, 1, 0, 0, 0, 0, 0,0,0, 0xbb},
  };
 //3.根据函数表修改xieyi.h的tab
 //4.在主程序中调用xieyi_scan();

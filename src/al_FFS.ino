@@ -30,30 +30,30 @@ void alFFS_init()
 // }
 void alFFS_addRec()
 {
-
-   //时间日期
-   char tempStr[15];
-   char tempStrtemplate[] = "%d%02d%02d %02d:%02d";
-   snprintf(tempStr, sizeof(tempStr), tempStrtemplate, (now1.year+2000),now1.month,now1.day,now1.hour,now1.minute);
-  // Serial.printf("DATE:%d\n",strlen( tempStr));
+   Serial.println("in alffs_addRec");
+//    //时间日期
+    char tempStr[18];
+    char tempStrtemplate[] = "%d%02d%02d %02d:%02d:%02d";
+    snprintf(tempStr, sizeof(tempStr), tempStrtemplate, (now1.year+2000),now1.month,now1.day,now1.hour,now1.minute,now1.second);
+   Serial.printf("DATE:%d\n",strlen( tempStr));
  
 
 //  Serial.println(tempStr);
  // Serial.print("now the alFFS_thisRec_firstData_flag value is :");
-//  Serial.println(alFFS_thisRec_firstData_flag);
+  Serial.printf("firstDdata=%d\n",alFFS_thisRec_firstData_flag);
   if (alFFS_thisRec_firstData_flag)
   {
       alFFS_thisRec_firstData_flag = false;
       Serial.println("first rec, so create a file named:");
 
-    char tempPathtemplate[] = "/R%d%02d%02d_%02d%02d.json";
-    snprintf(nowREC_filepath, sizeof(nowREC_filepath), tempPathtemplate, now1.year,now1.month,now1.day,now1.hour,now1.minute);
+    // char tempPathtemplate[] = "/R%d%02d%02d_%02d%02d.json";
+    // snprintf(nowREC_filepath, sizeof(nowREC_filepath), tempPathtemplate, now1.year,now1.month,now1.day,now1.hour,now1.minute);
  //   Serial.println(nowREC_filepath);
  //   Serial.println("now first write content to it");
-    File f = SPIFFS.open(nowREC_filepath, FILE_WRITE);
+    File f = SPIFFS.open("/list.json", FILE_WRITE);
     String strtemp = "{\"st\":\"" + (String)tempStr +
                      "\",\"data\": [{\"tm\":\"" + (String)tempStr +
-                     "\",\"tmsp\":" + (String)(unixtime() ) +//- 8 * 60 * 60
+                     "\",\"tmsp\":" + (String)(unixtime() ) +
                      ",\"tp\":" + (String)currentTemp +
                      ",\"h\":" + (String)currentHumi +
                      ",\"E\":" + (String)locationE +
@@ -66,10 +66,10 @@ void alFFS_addRec()
   }
   else
   {
-   // Serial.println("not the first rec, so i can just append some content in to the file:");
-    //Serial.println(nowREC_filepath);
-    File f = SPIFFS.open(nowREC_filepath, FILE_APPEND);
-        String strtemp = "{\"st\":\"" + (String)tempStr +
+    Serial.println("not the first rec, so i can just append some content in to the file:");
+    
+    File f = SPIFFS.open("/list.json", FILE_APPEND);
+        String strtemp = "{\"tm\":\"" + (String)tempStr +
                      "\",\"data\": [{\"tm\":\"" + (String)tempStr +
                      "\",\"tmsp\":" + (String)(unixtime() ) +
                      ",\"tp\":" + (String)currentTemp +
@@ -85,7 +85,7 @@ void alFFS_addRec()
 
 void alFFS_readRecing()
 {
-  File f = SPIFFS.open(nowREC_filepath, FILE_READ);
+  File f = SPIFFS.open("/list.json", FILE_READ);
   // String strtemp;
   // strtemp = f.readString();
   Serial.println("read out the file:");
@@ -187,6 +187,8 @@ void readFile(fs::FS &fs, const char * path){
     String data = file.readString();
     data.toCharArray(aa,s+1);
     Serial.printf(aa);
+    Serial.printf("]}");
+
    // Serial.println(data);
    // Serial.println("- read from file:");
     // while(file.available()){
@@ -195,7 +197,7 @@ void readFile(fs::FS &fs, const char * path){
     file.close();
 }
 //写文件
-int writeFile(fs::FS &fs, const char * path, const char * message){
+int writeFile(fs::FS &fs, const char * path, String message){
     Serial.printf("Writing file: %s\r\n", path);
 
     File file = fs.open(path, FILE_WRITE);
@@ -323,3 +325,33 @@ void testFileIO(fs::FS &fs, const char * path){
 // void loop(){
 
 // }
+void alFFS_Writelist(bool x)//写正常记录文件
+{
+   if(!x)//第一次写
+   {
+     uint32_t lenght;
+     String txt="{\"id\": \"1\",\"params\":[{\"temp\": { \"value\":"+(String)currentTemp+
+     "},\"humi\": {\"value\":"+(String)currentHumi+
+     "},\"le\": {\"value\":" +(String)locationE+
+     "},\"ln\": {\"value\":" +(String)locationN+
+     "},\"time\": {\"value\":" +(String)now_unixtime+
+     "}}";     
+   
+    lenght=writeFile(SPIFFS, "/list.json", txt);
+    Serial.printf("TXT size:%d",lenght);
+    readFile(SPIFFS, "/list.json");
+   }
+   else
+   {
+     String txt = ",{\"temp\": { \"value\":"+(String)currentTemp+
+                  "},\"humi\": {\"value\":" +(String)currentHumi+
+                      "},\"le\": {\"value\":" +(String)locationE+
+                      "},\"ln\": {\"value\": "+(String)locationN+
+                  "},\"time\": {\"value\":"+(String)now_unixtime+
+                  "}}";       
+     //] }
+    appendFile(SPIFFS, "/list.json", txt);
+    readFile(SPIFFS, "/list.json");
+   }
+   
+}
