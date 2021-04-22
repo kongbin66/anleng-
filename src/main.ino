@@ -1,8 +1,8 @@
 #include "config.h"
 
-TaskHandle_t task1=NULL; //第二核创建一个任务句柄
-TaskHandle_t ds_task=NULL;
-TaskHandle_t xieyi_task=NULL;
+TaskHandle_t task1 = NULL; //第二核创建一个任务句柄
+TaskHandle_t ds_task = NULL;
+TaskHandle_t xieyi_task = NULL;
 
 int rollback = 0;
 
@@ -78,53 +78,88 @@ void setup()
     wakeup_init_time();
   }
 
-  // if (oledState == OLED_ON)
-  // {
-  //   showWelcome();
-  //   postMsgId = 0; //清记录条数
-  // }
-  // else
-  // {
-  //   Serial.printf("NO,BUYAOJINRU CONGXINKAISHI ");
-  //   // if (workingState == WORKING && (esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_TIMER)) //不是开机，是定时唤醒。
-  //   // {
-  //   //   //send_Msg_var_GSM_while_OLED_off(); //上传
-  //   //   //testx();
-  //   //   go_sleep_a_while_with_ext0();      //休眠
-  //   // }
-  // }
+  if (oledState == OLED_ON)
+  {
+    showWelcome();
+    postMsgId = 0; //清记录条数
+  }
+  else
+  {
+    Serial.printf("NO,BUYAOJINRU CONGXINKAISHI ");
+    if (workingState == WORKING && (esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_TIMER)) //不是开机，是定时唤醒。
+    {
+      send_Msg_var_GSM_while_OLED_on(0); //上传
+
+      go_sleep_a_while_with_ext0(); //休眠
+    }
+  }
 }
 
 void loop()
 {
-  // if (POWER_warning_flag)
-  // {
-  //   Serial.println("diaodianle!");
-  // }
+  if (POWER_warning_flag)
+  {
+    Serial.println("diaodianle!");
+  }
 
-  // if (oledState == OLED_ON)
-  // {
-  //   sht20getTempAndHumi();
-  //   screen_loop(); //展示和滚屏
-  //   key_loop();
-  //   screen_show(); //OLED最终显示
-  //   //send_Msg_var_GSM_while_OLED_off2();
-  // }
-  // oled_on_off_switch();
+  if (oledState == OLED_ON)
+  {
+    sht20getTempAndHumi();
+    screen_loop(); //展示和滚屏
+    key_loop();
+    screen_show(); //OLED最终显示
+    send_Msg_var_GSM_while_OLED_on(1);
+  }
+  oled_on_off_switch();
 }
 
+//发送格式
+// {
+//     "id": "123",
+//     "version": "1.0",
+//     "params": {
+//         "Power": {
+//             "value": "12345",
+//             "time": 1599534283111
+//         },
+//         "temp": {
+//             "value": 23.6,
+//             "time": 1599534283111
+//         }
+//     }
+// }
 
-uint8_t i;
-void send_Msg_var_GSM_while_OLED_off2()
+//漏发文本记录格式
+// {
+//     "id": "123",
+//     "version": "1.0",
+//     "params": {
+//         "Power": {
+//             "value": "12345",
+//             "time": 1599534283111
+//         },
+//         "temp": {
+//             "value": 23.6,
+//             "time": 1599534283111
+//         }
+//     }
+// }
+
+//
+
+void send_Msg_var_GSM_while_OLED_off()
 {
+
   Serial.printf("Jinru off2 fasong chengxv!!OK!");
   if (f_Flight_Mode == 0) //飞行模式未打开
   {
-    setupModem();         //SIM800L物理开机
-    modemToGPRS();        //modem连接GPRS
+    setupModem();  //SIM800L物理开机
+    modemToGPRS(); //modem连接GPRS
     //確定网络通畅
-    if (0==getLBSLocation()) //网络通畅
+    bool i = getLBSLocation();
+    if (i == 0) //网络通畅
     {
+
       Serial.println("wangluo tongchang ok");
       //确定有无漏发文件
       if (f_lose == 0) //没有
@@ -133,16 +168,21 @@ void send_Msg_var_GSM_while_OLED_off2()
         //发送数据
         sht20getTempAndHumi(); //获取温湿度数据
         onenet_connect();
-        if (client.connected()) sendTempAndHumi();
+        if (client.connected())
+          sendTempAndHumi();
         //保存本条数据
-        alFFS_addRec();
-        alFFS_readRecing();
+        alFFS_addlist();
+        alFFS_readlist();
       }
       else //有
       {
+        Serial.println("YOU lou fa!");
         //保存本条信息
-        alFFS_addRec();
-        alFFS_readRecing();
+        alFFS_addlose();
+        alFFS_addlist();
+
+        alFFS_readlist();
+        alFFS_readlose();
         //读漏发文件
         //逐条发送
         //发送本条信息
@@ -154,8 +194,10 @@ void send_Msg_var_GSM_while_OLED_off2()
     {
       //本条信息保存文件系统
       Serial.println("wangluo_butong ! err");
-      alFFS_addRec();
-      alFFS_readRecing();
+      alFFS_addlose();
+      alFFS_addlist();
+
+      alFFS_readlist();
       //本条信息保存漏发文件，并使能漏发标志
       f_lose = 1;
     }
@@ -169,15 +211,15 @@ void send_Msg_var_GSM_while_OLED_off2()
   }
 }
 
-void send_Msg_var_GSM_while_OLED_on()
+void test100(bool a)
 {
-
+  Serial.printf("goto testx!");
   if (workingState == WORKING)
   {
     now_rec_stamp = unixtime();
 
     Serial.println("GSM transmission will start at:" + (String)(sleeptime - (now_rec_stamp - last_rec_stamp)));
-    if (now_rec_stamp - last_rec_stamp > sleeptime) //发送间隔
+    // if (now_rec_stamp - last_rec_stamp > sleeptime) //发送间隔
     {
       Serial.println("now_rec_stamp:" + (String)now_rec_stamp);
       Serial.println("last_rec_stamp:" + (String)last_rec_stamp);
@@ -185,61 +227,324 @@ void send_Msg_var_GSM_while_OLED_on()
       screen_loopEnabled = false;
       key_attach_null();
       //上传
-      display.clear();
-      display.setFont(Roboto_Condensed_12);
-      display.setTextAlignment(TEXT_ALIGN_CENTER);
-      display.drawString(64, 5, "Initializing modem...");
-      display.drawProgressBar(5, 50, 118, 8, 5);
-      display.display();
+      if (a)
+      {
+        display.clear();
+        display.setFont(Roboto_Condensed_12);
+        display.setTextAlignment(TEXT_ALIGN_CENTER);
+        display.drawString(64, 5, "Initializing modem...");
+        display.drawProgressBar(5, 50, 118, 8, 5);
+        display.display();
+      }
       setupModem(); //SIM800L物理开机
+      if (a)
+      {
+        display.clear();
+        display.drawString(64, 5, "Waiting for network...");
+        display.drawProgressBar(5, 50, 118, 8, 40);
+        display.display();
+      }
 
-      display.clear();
-      display.drawString(64, 5, "Waiting for network...");
-      display.drawProgressBar(5, 50, 118, 8, 40);
-      display.display();
       modemToGPRS(); //modem连接GPRS
-
-      display.clear();
-      display.drawString(64, 5, "getting LBS...");
-      display.drawProgressBar(5, 50, 118, 8, 70);
-      display.display();
+      if (a)
+      {
+        display.clear();
+        display.drawString(64, 5, "getting LBS...");
+        display.drawProgressBar(5, 50, 118, 8, 70);
+        display.display();
+      }
       getLBSLocation(); //获取定位信息
-
-      display.clear();
-      display.drawString(64, 5, "connecting to OneNet");
-      display.drawProgressBar(5, 50, 118, 8, 90);
-      display.display();
+      if (a)
+      {
+        display.clear();
+        display.drawString(64, 5, "connecting to OneNet");
+        display.drawProgressBar(5, 50, 118, 8, 90);
+        display.display();
+      }
       sht20getTempAndHumi(); //获取温湿度数据
       onenet_connect();
+      if (a)
+      {
+        display.clear();
+        display.drawString(64, 5, "uploading...");
+      }
 
-      display.clear();
-      display.drawString(64, 5, "uploading...");
       if (client.connected())
       {
-        char subscribeTopic[75];
-        char topicTemplate[] = "$sys/%s/%s/cmd/request/#"; //信息模板
-        snprintf(subscribeTopic, 75, topicTemplate, mqtt_pubid, mqtt_devid);
-        client.subscribe(subscribeTopic); //订阅命令下发主题
         sendTempAndHumi();
       }
-      display.drawProgressBar(5, 50, 118, 8, 100);
-      display.display();
-      delay(200);
-      display.setTextAlignment(TEXT_ALIGN_LEFT);
+      else
+        Serial.printf("sendTempAndHumi() eer!\n");
+      if (a)
+      {
+        display.drawProgressBar(5, 50, 118, 8, 100);
+        display.display();
+        delay(200);
+        display.setTextAlignment(TEXT_ALIGN_LEFT);
+      }
+
       key_init();
       last_rec_stamp = unixtime();
       screen_loopEnabled = true;
       screen_On_Start = sys_sec;
       screen_On_now = sys_sec;
 
-      alFFS_addRec();
-      alFFS_readRecing();
+      alFFS_addlist();
+      // alFFS_readRecing();
 
       postMsgId++;
     }
   }
   digitalWrite(MODEM_POWER_ON, LOW);
 }
+
+void send_Msg_var_GSM_while_OLED_on(bool a)
+{
+  //Serial.printf("goto send_Msg_var_GSM_while_OLED_on(bool a)\n");
+
+  now_rec_stamp = unixtime(); //读现在时间
+  screen_loopEnabled = false;
+  //key_attach_null();
+  //确定进入条件
+  if (workingState == WORKING && f_Flight_Mode == false) //工作模式和飞行模式关闭（正常记录）
+  {
+    Serial.printf("zhengchang jilu\n ");
+    if (now_rec_stamp - last_rec_stamp > sleeptime) //记录间隔到了吗？
+    {
+      Serial.printf("zhengchang mode time Ok!\n ");
+      //1.需要联网测网络
+      if (a)
+      {
+        display.clear();
+        display.setFont(Roboto_Condensed_12);
+        display.setTextAlignment(TEXT_ALIGN_CENTER);
+        display.drawString(64, 5, "Initializing modem...");
+        display.drawProgressBar(5, 50, 118, 8, 5);
+        display.display();
+      }
+      setupModem();
+      if (a)
+      {
+        display.clear();
+        display.drawString(64, 5, "Waiting for network...");
+        display.drawProgressBar(5, 50, 118, 8, 40);
+        display.display();
+      }
+      modemToGPRS();
+      if (a)
+      {
+        display.clear();
+        display.drawString(64, 5, "getting LBS...");
+        display.drawProgressBar(5, 50, 118, 8, 70);
+        display.display();
+      }
+      if (!getLBSLocation()) //检查网络情况
+      {
+        Serial.printf("zhengchang mode wangluo  OK！\n ");
+        //检查有漏发文件和飞行模式标志吗
+        if (f_Flight_Mode == true && f_lose == true) //正在飞行模式中
+        {
+          Serial.printf("feixing mode zhijietuichu ！\n ");
+          f_Flight_Mode = true;
+          f_lose = true;
+        }
+        else if (f_Flight_Mode == false && f_lose == false) //正常记录和发送
+        {
+          Serial.printf("run ！\n ");
+          if (a)
+          {
+            display.clear();
+            display.drawString(64, 5, "connecting to OneNet");
+            display.drawProgressBar(5, 50, 118, 8, 90);
+            display.display();
+          }
+          //获取时间温度
+          sht20getTempAndHumi();
+          //1.记录正常文件
+          alFFS_addlist();
+          alFFS_readlist();
+          //2.发送数据
+          onenet_connect();
+          if (a)
+          {
+            display.clear();
+            display.drawString(64, 5, "uploading...");
+          }
+          if (client.connected())
+          {
+            sendTempAndHumi();
+            if (a)
+            {
+              display.drawProgressBar(5, 50, 118, 8, 100);
+              display.display();
+              delay(200);
+              display.setTextAlignment(TEXT_ALIGN_LEFT);
+            }
+
+            key_init();
+            last_rec_stamp = unixtime();
+            screen_loopEnabled = true;
+            screen_On_Start = sys_sec;
+            screen_On_now = sys_sec;
+
+            postMsgId++;
+          }
+          else
+            Serial.printf("sendTempAndHumi() eer!\n"); //这里应加入F_LOSE=1?
+          //3.标志位
+        }
+        else if (f_Flight_Mode == false && f_lose == true) //有漏发文件非飞行模式
+        {
+          Serial.printf("fei feixingmoshi youloufa \n");
+        
+          //调用一个函数
+        }
+        else
+          Serial.printf("qitamoshi zhong tuicu! qingjiancha !!!!!!!\n");
+      }
+      else
+      {
+        Serial.printf("zhengchang mode wangluo  eer！\n ");
+        //1.直接写漏发文件和正常记录文件
+        alFFS_addlist();
+        alFFS_addlose();
+        alFFS_readlist();
+        alFFS_readlose();
+        //置位标志位
+        f_lose = true;
+      }
+    }
+    else
+      Serial.printf("zhengchang mode time no!");
+  }
+  else if (workingState == WORKING && f_Flight_Mode == true) //工作模式和飞行模式关闭（不上传网络）
+  {
+    Serial.println("jilu no send");
+    if (now_rec_stamp - last_rec_stamp > sleeptime) //记录间隔到了吗？
+    {
+      //1.直接写漏发文件和正常记录文件
+      alFFS_addlist();
+      alFFS_addlose();
+      alFFS_readlist();
+      alFFS_readlose();
+      //置位标志位
+      f_lose = true;
+
+      key_init();
+      last_rec_stamp = unixtime();
+      screen_loopEnabled = true;
+      screen_On_Start = sys_sec;
+      screen_On_now = sys_sec;
+    }
+    else
+      Serial.println("feixing mode timer no");
+  }
+  else //无操作，退出
+  {
+    Serial.println("no worke , jump out!");
+      if((f_lose==true)&&(workingState ==NOT_WORKING)&&(f_Flight_Mode==false)&&(old_workingstate==0))//真正的状态
+      {
+          Serial.println("bufa louchuan");
+          old_workingstate= workingState;
+          workingState = WORKING; 
+          key_init();
+          last_rec_stamp = unixtime();
+ //         screen_loopEnabled = true;
+          // screen_On_Start = sys_sec;
+          // screen_On_now = sys_sec;       
+      }
+         
+  }
+}
+
+void test101(bool a)
+{
+  Serial.printf("goto testx!");
+  workingState = WORKING;
+  if (workingState == WORKING)
+  {
+    now_rec_stamp = unixtime();
+
+    Serial.println("GSM transmission will start at:" + (String)(sleeptime - (now_rec_stamp - last_rec_stamp)));
+    // if (now_rec_stamp - last_rec_stamp > sleeptime) //发送间隔
+    {
+      Serial.println("now_rec_stamp:" + (String)now_rec_stamp);
+      Serial.println("last_rec_stamp:" + (String)last_rec_stamp);
+
+      screen_loopEnabled = false;
+      key_attach_null();
+      //上传
+      if (a)
+      {
+        display.clear();
+        display.setFont(Roboto_Condensed_12);
+        display.setTextAlignment(TEXT_ALIGN_CENTER);
+        display.drawString(64, 5, "Initializing modem...");
+        display.drawProgressBar(5, 50, 118, 8, 5);
+        display.display();
+      }
+      setupModem(); //SIM800L物理开机
+      if (a)
+      {
+        display.clear();
+        display.drawString(64, 5, "Waiting for network...");
+        display.drawProgressBar(5, 50, 118, 8, 40);
+        display.display();
+      }
+
+      modemToGPRS(); //modem连接GPRS
+      if (a)
+      {
+        display.clear();
+        display.drawString(64, 5, "getting LBS...");
+        display.drawProgressBar(5, 50, 118, 8, 70);
+        display.display();
+      }
+      getLBSLocation(); //获取定位信息
+      if (a)
+      {
+        display.clear();
+        display.drawString(64, 5, "connecting to OneNet");
+        display.drawProgressBar(5, 50, 118, 8, 90);
+        display.display();
+      }
+      sht20getTempAndHumi(); //获取温湿度数据
+      onenet_connect();
+      if (a)
+      {
+        display.clear();
+        display.drawString(64, 5, "uploading...");
+      }
+
+      if (client.connected())
+      {
+        sendTempAndHumi();
+      }
+      else
+        Serial.printf("sendTempAndHumi() eer!\n");
+      if (a)
+      {
+        display.drawProgressBar(5, 50, 118, 8, 100);
+        display.display();
+        delay(200);
+        display.setTextAlignment(TEXT_ALIGN_LEFT);
+      }
+
+      key_init();
+      last_rec_stamp = unixtime();
+      screen_loopEnabled = true;
+      screen_On_Start = sys_sec;
+      screen_On_now = sys_sec;
+
+      alFFS_addlist();
+      // alFFS_readRecing();
+
+      postMsgId++;
+    }
+  }
+  digitalWrite(MODEM_POWER_ON, LOW);
+}
+
 //设置休眠时间：（S）
 void SET_SLEEPTIME(time_t t)
 {
@@ -263,289 +568,43 @@ void SET_Last_span_Sleep_span(int x, int y)
   Serial.printf("screen_Off_to_sleep_span:%ld\r\n", screen_Off_to_sleep_span);
 }
 
-void send_Msg_var_GSM_while_OLED_off()
-{
-  setupModem();          //SIM800L物理开机
-  modemToGPRS();         //modem连接GPRS
-  getLBSLocation();      //获取定位信息
-  sht20getTempAndHumi(); //获取温湿度数据
-  onenet_connect();
-  if (client.connected())
-  {
-    char subscribeTopic[75];                           //订阅主题
-    char topicTemplate[] = "$sys/%s/%s/cmd/request/#"; //信息模板
-    snprintf(subscribeTopic, sizeof(subscribeTopic), topicTemplate, mqtt_pubid, mqtt_devid);
-    client.subscribe(subscribeTopic); //订阅命令下发主题
-    sendTempAndHumi();
-  }
-  alFFS_addRec();
-  alFFS_readRecing();
-
-  delay(1000);
-  digitalWrite(MODEM_POWER_ON, LOW); //关断800C电源
-  last_rec_stamp = unixtime();
-  postMsgId++;
-}
-int tempStr =0;
-
-
-//检测网络
-bool GSM_starts_networking()
-{
-    setupModem();     //SIM800L物理开机
-    modemToGPRS();    //modem连接GPRS
-    //获取定位信息
-    return getLBSLocation();
-}
-
-// bool GSM_send_data(String x)
-// {
-//     onenet_connect();
-//     if (client.connected())
-//     {
-//           char subscribeTopic[75];                           //订阅主题
-//           char topicTemplate[] = "$sys/%s/%s/cmd/request/#"; //信息模板
-//           snprintf(subscribeTopic, sizeof(subscribeTopic), topicTemplate, mqtt_pubid, mqtt_devid);
-//           client.subscribe(subscribeTopic); //订阅命令下发主题
-//           sendTempAndHumi();
-//     }
-// }
-
-
-
-void send_Msg_var_GSM_while_OLED_on2()
-{
-  if (f_Flight_Mode == 0) //飞行模式未打开
-  {
-    
-    //確定网络通畅
-    if (GSM_starts_networking()) //网络通畅
-    {
-      //确定有无漏发文件
-      if (f_lose == 0) //没有
-      {
-        sht20getTempAndHumi(); //获取温湿度数据
-       // GSM_send_data(String x);
-        //保存本条数据
-          String strtemp = "{\"st\":\"" + (String)tempStr +
-                           "\",\"data\": [{\"tm\":\"" + (String)tempStr +
-                           "\",\"tmsp\":" + (String)(unixtime()) + //- 8 * 60 * 60
-                           ",\"tp\":" + (String)currentTemp +
-                           ",\"h\":" + (String)currentHumi +
-                           ",\"E\":" + (String)locationE +
-                           ",\"N\":" + (String)locationN +
-                           "}";
-          appendFile(SPIFFS, "/list.json", strtemp);
-          readFile(SPIFFS, "/list.json");
-      }
-      else //有
-      {
-        //保存本条信息
-        //读漏发文件
-        //逐条发送
-        //发送本条信息
-        //发送完成后请漏发文件
-        writeFile(SPIFFS, "/lose.json","");
-      }
-    }
-    else //网络不通
-    {
-      //本条信息保存文件系统
-      //本条信息保存漏发文件，并使能漏发标志
-    }
-  }
-  else //飞行模式打开了
-  {
-    //关闭GSM电源
-    digitalWrite(MODEM_POWER_ON, LOW);
-    //本条信息保存文件系统
-
-    //本条信息保存漏发文件，并使能漏发标志
-  }
-}
-
-
-
-//发送格式
-// {
-//     "id": "123",
-//     "version": "1.0",
-//     "params": {
-//         "Power": {
-//             "value": "12345",
-//             "time": 1599534283111
-//         },
-//         "temp": {
-//             "value": 23.6,
-//             "time": 1599534283111
-//         }   
-//     }
-// }
-
-//漏发文本记录格式
-// {
-//     "id": "123",
-//     "version": "1.0",
-//     "params": {
-//         "Power": {
-//             "value": "12345",
-//             "time": 1599534283111
-//         },
-//         "temp": {
-//             "value": 23.6,
-//             "time": 1599534283111
-//         }   
-//     }
-// }
-
-//
-
-
-                           
-
-
-
-
-
-
-
-// currentTemp, currentHumi, locationE, locationN,now_unixtime;
-//  String strtempx = "{\"st\":\"" + (String)tempStr +
-//                            "\",\"data\": [{\"tm\":\"" + (String)tempStr +
-//                            "\",\"tmsp\":" + (String)(unixtime()) + //- 8 * 60 * 60
-//                            ",\"tp\":" + (String)currentTemp +
-//                            ",\"h\":" + (String)currentHumi +
-//                            ",\"E\":" + (String)locationE +
-//                            ",\"N\":" + (String)locationN +
-//                            "}";
-// String strtemp2 = "{\"id\": \"1\",\"params\": {\"temp\":{\"value\":"+(String)currentTemp+
-//                                                         "\"time\":" +(String)now_unixtime+
-//                                               "},\"humi\":{\"value\":"+(String)currentHumi+
-//                                               ",\"time\":"+(String)now_unixtime+
-//                                               "},\"le\":{\"value\":"+(String)locationE+
-//                                               ",\"time\":" +(String)now_unixtime+
-//                                               "},\"ln\":{\"value\":"+(String)locationN+
-//                                                ",\"time\": "+(String)now_unixtime+
-//                                               "},\"start_time\":{\"value\":"+(String)now_unixtime+
-//                                               ",\"time\":"+ (String)now_unixtime+"}}}"
-
-
-
-
-
-
-// void send_Msg_var_GSM_while_OLED_off()
-// {
-  
-//   alFFS_addRec();
-//   alFFS_readRecing();
-
-//   delay(1000);
-//   digitalWrite(MODEM_POWER_ON, LOW); //关断800C电源
-//   last_rec_stamp = unixtime();
-//   postMsgId++;
-// }
-
-
-
-
-
-
-void sendTempAndHumi2()
-{
-  if (client.connected())
-  {
-    //先拼接出json字符串
-    //char param[178];
-    char jsonBuf[500];
-    String str = "{\"id\":\"1\",\"params\":{\"temp\":{\"value\":"+(String)currentTemp+
-                                              
-                                              "},\"humi\":{\"value\":"+(String)currentHumi+
-                                           
-                                              "},\"le\":{\"value\":"+(String)locationE+
-                                         
-                                              "},\"ln\":{\"value\":"+(String)locationN+
-                                            
-                                              "},\"start_time\":{\"value\":"+(String)unixtime()+
-                                             "}}}";
-    int i=writeFile(SPIFFS, "/lose.json",jsonBuf );
-    Serial.printf("size:%d\r\n",i);
-    //str.toCharArray(jsonBuf,500,0);
-    Serial.println(jsonBuf);
-    
-    //sprintf(param, "{\"temp\":{\"value\":%.2f},\"humi\":{\"value\":%.2f},\"le\":{\"value\":%.2f},\"ln\":{\"value\":%.2f},\"start_time\":{\"value\":%u000}}", currentTemp, currentHumi, locationE, locationN,now_unixtime); //我们把要上传的数据写在param里 
-
-    //sprintf(jsonBuf, ONENET_POST_BODY_FORMAT,param);
-
-
-
-
-    //再从mqtt客户端中发布post消息
-    if (client.publish(ONENET_TOPIC_PROP_POST, jsonBuf))
-    {
-      Serial.print("Post message to cloud: ");
-      Serial.println(jsonBuf);
-      current_rec_State = KEEP_RECING;
-    }
-    else
-    {
-      Serial.println("Publish message to cloud failed!");
-    }
-
-  }
-}
-
-
-
-void test()
-{
-  String strtemp = "{\"st\":\"" + (String)tempStr +
-                           "\",\"data\": [{\"tm\":\"" + (String)tempStr +
-                           "\",\"tmsp\":" + (String)(unixtime()) + //- 8 * 60 * 60
-                           ",\"tp\":" + (String)currentTemp +
-                           ",\"h\":" + (String)currentHumi +
-                           ",\"E\":" + (String)locationE +
-                           ",\"N\":" + (String)locationN +
-                           "}";
-         
-          appendFile(SPIFFS, "/list.json", strtemp);
-          readFile(SPIFFS, "/list.json");
-}
 void test2()
 {
   listDir(SPIFFS, "/", 0);
-
 }
-void test3()
+void test3(bool a)
 {
-  Serial.printf("format FFS:%d", SPIFFS.format());
-
+  f_Flight_Mode = a;
+  workingState = a;
+  Serial.printf("f_Flight_Mode=%d\n", f_Flight_Mode);
 }
-void test4()
+void test4(bool a)
 {
-  writeFile(SPIFFS, "/lose.json","");
-  writeFile(SPIFFS, "/list.json","");
-
+  f_lose = a;
+  Serial.printf("f_lose=%d\n", f_lose);
 }
 
-void test5(uint8_t f_one)//读文件辨认条目
+void test5(uint8_t a) //读文件辨认条目
 {
-  if(f_one)
+  if (a == 0)
   {
-    writeFile(SPIFFS, "/lose.json","");
+    writeFile(SPIFFS, "/list.json", "");
+    writeFile(SPIFFS, "/lose.json", "");
   }
-  else
+  else if (a == 1)
   {
-     appendFile(SPIFFS, "/lose.json","456");
+    writeFile(SPIFFS, "/list.json", "");
   }
-  //读取文件
-  readFile(SPIFFS,  "/lose.json");
+  else if (a == 2)
+  {
+    writeFile(SPIFFS, "/lose.json", "");
+  }
 
+  //读取文件mulu
+  listDir(SPIFFS, "/", 0);
 }
 
-
-
-//文本记录格式 
+//文本记录格式
 // {
 //   "id":"1",
 //   "params":
@@ -565,8 +624,10 @@ void test5(uint8_t f_one)//读文件辨认条目
 //                            ",\"E\":" + (String)locationE +
 //                            ",\"N\":" + (String)locationN +
 //                            "}";
-void testx(bool x)//写漏發文件
-{
 
-   
+
+void buloufa()
+{
+  //读取漏发文件
+
 }

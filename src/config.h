@@ -85,6 +85,7 @@ SH1106Wire display(0x3c, 21, 22);
 #define NOT_WORKING 0
 //工作
 #define WORKING 1
+bool old_workingstate= NOT_WORKING;
 //state of Screens
 #define MAIN_TEMP_SCREEN 0
 #define MAIN_HUMI_SCREEN 1
@@ -266,8 +267,13 @@ void eeprom_config_init();
 void eeprom_config_save_parameter(void);
 /*********************************SPIFFS相关函数 al_FFS.ino**********/
 void alFFS_init();
-void alFFS_addRec();
-void alFFS_readRecing();
+//正常保存文件
+void alFFS_addlist();
+//保存到漏发文件
+void alFFS_addlose(); 
+void alFFS_readlist();
+//读漏发文件
+void alFFS_readlose();
 void alFFS_endRec();
 /*********************************显示屏相关函数 al_oled.ino**********/
 void showWelcome();

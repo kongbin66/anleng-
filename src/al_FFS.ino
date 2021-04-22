@@ -28,22 +28,23 @@ void alFFS_init()
 // {
 
 // }
-void alFFS_addRec()
+void alFFS_addlist()
 {
-   Serial.println("in alffs_addRec");
+   Serial.println("in alffs_addlist");
 //    //时间日期
     char tempStr[18];
     char tempStrtemplate[] = "%d%02d%02d %02d:%02d:%02d";
     snprintf(tempStr, sizeof(tempStr), tempStrtemplate, (now1.year+2000),now1.month,now1.day,now1.hour,now1.minute,now1.second);
    Serial.printf("DATE:%d\n",strlen( tempStr));
- 
+    sht20getTempAndHumi(); //读取温湿度，
+    //连不上网没有坐标位置
+
 
 //  Serial.println(tempStr);
  // Serial.print("now the alFFS_thisRec_firstData_flag value is :");
   Serial.printf("firstDdata=%d\n",alFFS_thisRec_firstData_flag);
   if (alFFS_thisRec_firstData_flag)
   {
-      alFFS_thisRec_firstData_flag = false;
       Serial.println("first rec, so create a file named:");
 
     // char tempPathtemplate[] = "/R%d%02d%02d_%02d%02d.json";
@@ -58,7 +59,7 @@ void alFFS_addRec()
                      ",\"h\":" + (String)currentHumi +
                      ",\"E\":" + (String)locationE +
                      ",\"N\":" + (String)locationN +
-                     "}";
+                     "}]}";
     f.println(strtemp);
    // Serial.println("ADD:" + strtemp);
     f.close();
@@ -69,31 +70,98 @@ void alFFS_addRec()
     Serial.println("not the first rec, so i can just append some content in to the file:");
     
     File f = SPIFFS.open("/list.json", FILE_APPEND);
-        String strtemp = "{\"tm\":\"" + (String)tempStr +
+        String strtemp = ",{\"tm\":\"" + (String)tempStr +
                      "\",\"data\": [{\"tm\":\"" + (String)tempStr +
                      "\",\"tmsp\":" + (String)(unixtime() ) +
                      ",\"tp\":" + (String)currentTemp +
                      ",\"h\":" + (String)currentHumi +
                      ",\"E\":" + (String)locationE +
                      ",\"N\":" + (String)locationN +
-                     "}";
+                     "}]}";
     f.println(strtemp);
 //    Serial.println("ADD:" + strtemp);
     f.close();
   }
 }
 
-void alFFS_readRecing()
+void alFFS_readlist()
 {
   File f = SPIFFS.open("/list.json", FILE_READ);
   // String strtemp;
   // strtemp = f.readString();
+  Serial.println("file size:"+(String)f.size());
   Serial.println("read out the file:");
-  Serial.println(f.readString());
+  Serial.print(f.readString());
   Serial.println("Size of json_file :" + (String)(f.size()) + "B");
   Serial.println("Size of json_file :" + (String)(f.size() / 1024.0) + "KB");
   Serial.println("Size of json_file :" + (String)((f.size() / 1024.0) / 1024.0) + "MB");
 }
+void alFFS_addlose()
+{
+
+    Serial.println("in alffs_lose");
+//    //时间日期
+    char tempStr[18];
+    char tempStrtemplate[] = "%d%02d%02d %02d:%02d:%02d";
+    snprintf(tempStr, sizeof(tempStr), tempStrtemplate, (now1.year+2000),now1.month,now1.day,now1.hour,now1.minute,now1.second);
+   Serial.printf("DATE:%d\n",strlen( tempStr));
+   sht20getTempAndHumi(); //获取温湿度数据
+ 
+
+//  Serial.println(tempStr);
+ // Serial.print("now the alFFS_thisRec_firstData_flag value is :");
+  Serial.printf("firstDdata=%d\n",alFFS_thisRec_firstData_flag);
+  if (alFFS_thisRec_firstData_flag)
+  {
+      Serial.println("first rec, so create a file named:");
+
+    // char tempPathtemplate[] = "/R%d%02d%02d_%02d%02d.json";
+    // snprintf(nowREC_filepath, sizeof(nowREC_filepath), tempPathtemplate, now1.year,now1.month,now1.day,now1.hour,now1.minute);
+ //   Serial.println(nowREC_filepath);
+ //   Serial.println("now first write content to it");
+    File f = SPIFFS.open("/lose.json", FILE_WRITE);
+    String strtemp ="{\"temp\":{\"value\":"+ (String)currentTemp +
+                     ",\"time\":"+ (String)(unixtime() ) +
+                     "},\"humi\":{\"value\":"+ (String)currentHumi +
+                     ",\"time\":"+ (String)(unixtime() ) +
+                     "},\"le\":{\"value\":"+ (String)locationE +
+                     ",\"time\":"+ (String)(unixtime() ) +
+                     "},\"ln\":{\"value\":"+ (String)locationN +
+                     ",\"time\":"+ (String)(unixtime() ) +
+                     "}}";
+    f.println(strtemp);
+   // Serial.println("ADD:" + strtemp);
+    f.close();
+  }
+  else
+  {
+    Serial.println("not the first rec, so i can just append some content in to the file:");
+    
+      File f = SPIFFS.open("/lose.json", FILE_APPEND);
+    String strtemp ="{\"temp\":{\"value\":"+ (String)currentTemp +
+                     ",\"time\":"+ (String)(unixtime() ) +
+                     "},\"humi\":{\"value\":"+ (String)currentHumi +
+                     ",\"time\":"+ (String)(unixtime() ) +
+                     "},\"le\":{\"value\":"+ (String)locationE +
+                     ",\"time\":"+ (String)(unixtime() ) +
+                     "},\"ln\":{\"value\":"+ (String)locationN +
+                     ",\"time\":"+ (String)(unixtime() ) +
+                     "}}";
+    f.println(strtemp);
+   // Serial.println("ADD:" + strtemp);
+    f.close();
+  }
+
+}
+void alFFS_readlose()
+{
+  File f = SPIFFS.open("/lose.json", FILE_READ);
+  Serial.println("lose file size:"+(String)f.size());
+  Serial.print(f.readString());
+}
+
+
+
 
 void alFFS_endRec()
 {
@@ -107,7 +175,7 @@ void alFFS_endRec()
   f.println(strtemp);
   Serial.println("ADD:" + strtemp);
   f.close();
-  alFFS_readRecing();
+  //alFFS_readRecing();
 }
 
 
@@ -327,7 +395,7 @@ void testFileIO(fs::FS &fs, const char * path){
 // }
 void alFFS_Writelist(bool x)//写正常记录文件
 {
-   if(!x)//第一次写
+   if(!x)//第一次写清除数据发送JSON头，同时能得到占用空间
    {
      uint32_t lenght;
      String txt="{\"id\": \"1\",\"params\":[{\"temp\": { \"value\":"+(String)currentTemp+
@@ -341,7 +409,7 @@ void alFFS_Writelist(bool x)//写正常记录文件
     Serial.printf("TXT size:%d",lenght);
     readFile(SPIFFS, "/list.json");
    }
-   else
+   else//否则添加文件
    {
      String txt = ",{\"temp\": { \"value\":"+(String)currentTemp+
                   "},\"humi\": {\"value\":" +(String)currentHumi+
@@ -355,3 +423,4 @@ void alFFS_Writelist(bool x)//写正常记录文件
    }
    
 }
+

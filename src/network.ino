@@ -49,18 +49,20 @@ void modemToGPRS()
 //获取时间和位置，更新ds1302
 bool getLBSLocation()
 {
-
+  int i=0;
   Serial.print("getting LBS...");
   float _locationE = 0, _locationN = 0, _locationA = 0; //地理位置,经度纬度
   int _timeLastNTP_Y = 0, _timeLastNTP_M = 0, _timeLastNTP_D = 0, _timeLastNTP_h = 0, _timeLastNTP_m = 0, _timeLastNTP_s = 0;
-  
-
-  while(_locationE==0&&_timeLastNTP_Y==0) //获取位置和时间
-  {
-    modem.getGsmLocation(&_locationE, &_locationN, &_locationA, &_timeLastNTP_Y, &_timeLastNTP_M, &_timeLastNTP_D, &_timeLastNTP_h, &_timeLastNTP_m, &_timeLastNTP_s);
+ //  modem.getGsmLocation(&_locationE, &_locationN, &_locationA, &_timeLastNTP_Y, &_timeLastNTP_M, &_timeLastNTP_D, &_timeLastNTP_h, &_timeLastNTP_m, &_timeLastNTP_s);
+  do{
+   modem.getGsmLocation(&_locationE, &_locationN, &_locationA, &_timeLastNTP_Y, &_timeLastNTP_M, &_timeLastNTP_D, &_timeLastNTP_h, &_timeLastNTP_m, &_timeLastNTP_s);
     delay(1000);
+    if((_locationE==0.0)&&(_timeLastNTP_Y==0)) Serial.println("err!\n");
+    if(++i>=10) return 1;
   }
-  Serial.println("OK!\n");
+  while((_locationE<0.1)&&(_timeLastNTP_Y!=now1.year+2000) );//获取位置和时间
+
+    Serial.println("OK!\n");
     locationE = _locationE;
     locationN = _locationN;
     locationA = _locationA;
@@ -72,7 +74,9 @@ bool getLBSLocation()
     timeLastNTP_s = _timeLastNTP_s;
     Serial.printf("time GSM: %d-%d-%d %d:%d:%d\r\n", timeLastNTP_Y, timeLastNTP_M,timeLastNTP_D,timeLastNTP_h,timeLastNTP_m,timeLastNTP_s);
     //对时 
-    now1.year = (_timeLastNTP_Y - 2000);
+    if(_timeLastNTP_Y!=now1.year+2000)
+    {
+       now1.year = (_timeLastNTP_Y - 2000);
     now1.month = _timeLastNTP_M;
     now1.day = _timeLastNTP_D;
     now1.hour =_timeLastNTP_h;
@@ -81,7 +85,10 @@ bool getLBSLocation()
     ds_rtc.setDateTime(&now1);
     Serial.printf("ds1302 time now: %d-%d-%d %d:%d:%d\r\n", (now1.year+2000), now1.month, now1.day,now1.hour, now1.minute, now1.second);
     Serial.println("ds1302 duishi ok!\n");
-     now_unixtime = unixtime();
+    }
+    
+    
+    now_unixtime = unixtime();
     time_last_async_stamp = unixtime();
     return 0;
     // timeNow_Y = timeLastNTP_Y;
