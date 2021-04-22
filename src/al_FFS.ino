@@ -91,7 +91,7 @@ void alFFS_readlist()
   // strtemp = f.readString();
   Serial.println("file size:"+(String)f.size());
   Serial.println("read out the file:");
-  Serial.print(f.readString());
+  Serial.println(f.readString());
   Serial.println("Size of json_file :" + (String)(f.size()) + "B");
   Serial.println("Size of json_file :" + (String)(f.size() / 1024.0) + "KB");
   Serial.println("Size of json_file :" + (String)((f.size() / 1024.0) / 1024.0) + "MB");
@@ -157,7 +157,7 @@ void alFFS_readlose()
 {
   File f = SPIFFS.open("/lose.json", FILE_READ);
   Serial.println("lose file size:"+(String)f.size());
-  Serial.print(f.readString());
+  Serial.println(f.readString());
 }
 
 

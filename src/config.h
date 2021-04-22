@@ -147,7 +147,7 @@ const int port = 1883;                     //端口号
 #define mqtt_password "version=2018-10-31&res=products%2F4LwKzUwOpX%2Fdevices%2Fal_kh00001_zx_0001&et=4092599349&method=md5&sign=xpaXrOTMJ9WJjOVolwJhWw%3D%3D"
 #endif
 
-#if 0
+#if 1
 const char *mqtt_server = "218.201.45.7"; //onenet 的 IP地址
 const int port = 1883;                     //端口号
 #define mqtt_devid "al_kh00001_zx_0002"         //设备ID
@@ -156,7 +156,7 @@ const int port = 1883;                     //端口号
 #define mqtt_password "version=2018-10-31&res=products%2F4LwKzUwOpX%2Fdevices%2Fal_kh00001_zx_0002&et=4092599349&method=md5&sign=FxSayE%2BpBzK9L1YgXt8rxA%3D%3D"
 #endif
 
-#if 1
+#if 0
 const char *mqtt_server = "218.201.45.7"; //onenet 的 IP地址
 const int port = 1883;                     //端口号
 #define mqtt_devid "al_kh00001_zx_0003"         //设备ID

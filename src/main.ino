@@ -308,7 +308,7 @@ void send_Msg_var_GSM_while_OLED_on(bool a)
   //确定进入条件
   if (workingState == WORKING && f_Flight_Mode == false) //工作模式和飞行模式关闭（正常记录）
   {
-    Serial.printf("zhengchang jilu\n ");
+    //Serial.printf("zhengchang jilu\n ");
     if (now_rec_stamp - last_rec_stamp > sleeptime) //记录间隔到了吗？
     {
       Serial.printf("zhengchang mode time Ok!\n ");
@@ -414,8 +414,8 @@ void send_Msg_var_GSM_while_OLED_on(bool a)
         f_lose = true;
       }
     }
-    else
-      Serial.printf("zhengchang mode time no!");
+   // else
+     // Serial.printf("zhengchang mode time no!");
   }
   else if (workingState == WORKING && f_Flight_Mode == true) //工作模式和飞行模式关闭（不上传网络）
   {
@@ -441,7 +441,7 @@ void send_Msg_var_GSM_while_OLED_on(bool a)
   }
   else //无操作，退出
   {
-    Serial.println("no worke , jump out!");
+    //Serial.println("no worke , jump out!");
       if((f_lose==true)&&(workingState ==NOT_WORKING)&&(f_Flight_Mode==false)&&(old_workingstate==0))//真正的状态
       {
           Serial.println("bufa louchuan");
@@ -568,8 +568,12 @@ void SET_Last_span_Sleep_span(int x, int y)
   Serial.printf("screen_Off_to_sleep_span:%ld\r\n", screen_Off_to_sleep_span);
 }
 
-void test2()
+void test2(bool a)
 {
+  alFFS_thisRec_firstData_flag=a;
+  writeFile(SPIFFS, "/list.json", "");
+  writeFile(SPIFFS, "/lose.json", "");
+    f_lose=0;
   listDir(SPIFFS, "/", 0);
 }
 void test3(bool a)
@@ -590,6 +594,7 @@ void test5(uint8_t a) //读文件辨认条目
   {
     writeFile(SPIFFS, "/list.json", "");
     writeFile(SPIFFS, "/lose.json", "");
+    f_lose=0;
   }
   else if (a == 1)
   {
@@ -598,6 +603,7 @@ void test5(uint8_t a) //读文件辨认条目
   else if (a == 2)
   {
     writeFile(SPIFFS, "/lose.json", "");
+    f_lose=0;
   }
 
   //读取文件mulu
@@ -626,8 +632,26 @@ void test5(uint8_t a) //读文件辨认条目
 //                            "}";
 
 
-void buloufa()
+void testx ()
 {
+  uint32_t i;
   //读取漏发文件
+  File f = SPIFFS.open("/lose.json", FILE_READ);
+  i=f.available();
+  char bb[i];
+  Serial.println("lose file size:"+(String)i);  
+  String aa=f.readString();
+  aa.toCharArray(bb,i,0);
+  //Serial.println(bb);
+ 
 
+
+ //
+
+}
+
+
+void testy(bool b)
+{
+alFFS_readlose();
 }
