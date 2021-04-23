@@ -1,18 +1,22 @@
 {
-  "temp": {
-    "value": 21.33,
-    "time": 1619110629
-  },
-  "humi": {
-    "value": 54.20,
-    "time": 1619110629
-  },
-  "le": {
-    "value": 0.00,
-    "time": 1619110629
-  },
-  "ln": {
-    "value": 0.00,
-    "time": 1619110629
-  }
+  "id": "1",
+  "params":
+  {
+      "temp": {
+        "value":%.2f,
+        "time":%u000
+      },
+      "humi": {
+        "value":%.2f,
+        "time":%u000
+      },
+      "le": {
+        "value":%.2f,
+        "time":%u000
+      },
+      "ln": {
+        "value":%.2f,
+        "time":%u000
+      }
+    }
 }

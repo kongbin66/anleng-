@@ -15,7 +15,7 @@
 #include "OneButton.h"
 #include <Ds1302.h>
 #include "xieyi.h"
-
+#include "Arduinojson.h"
 
 uint32_t unixtime(void) ;
 uint32_t sys_sec=0;
